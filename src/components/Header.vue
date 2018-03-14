@@ -56,11 +56,20 @@ export default {
         font-weight: bolder;
         color: lightgray;
     }
+    .myBrand:hover{
+        color: gray;
+    }
     .mygroup{
         margin-right: 10px;
     }
     .mygroup input[type="radio"]{
         display: none;
+    }
+    .fa-cog:hover{
+         color: gray;
+    }
+    .fa-cog{
+        color: lightgray;
     }
 </style>
 
