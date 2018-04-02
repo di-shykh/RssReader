@@ -7,7 +7,7 @@ const state = {
 
 const getters = {
     user: state => state.user,
-    isLogged: state => (state.user !== null)
+    isLogged: state => (state.user != null)
 }
 
 const mutations = {

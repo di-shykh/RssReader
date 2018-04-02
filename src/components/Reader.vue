@@ -6,6 +6,8 @@
     <h3>{{user.displayName}}</h3>
     <p>{{user.email}}</p>
     <button @click="logOut">Log out</button>
+    <button @click="gotoAdd">Push</button>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -13,6 +15,7 @@
  import auth from '@/auth'
  import Header from './Header'
  import Sidebar from './Sidebar'
+ import AddSource from './AddSource'
 
     export default {
         name: 'reader',
@@ -28,6 +31,9 @@
         methods: {
             logOut() {
                 auth.logout()
+            },
+            gotoAdd(){
+                this.$router.push('addsource');//не работает..Uncaught RangeError: Maximum call stack size exceeded
             }
         }
     }

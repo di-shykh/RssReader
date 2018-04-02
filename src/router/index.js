@@ -5,13 +5,19 @@ import auth from '@/auth'
 import Auth from '../components/Auth'
 import Reader from '../components/Reader'
 import Home from '../components/Home'
+import AddSource from '../components/AddSource'
 
 Vue.use(Router)
 
 var routes = [
   { path: '', name: 'home', component: Home },
   { path: '/auth', name: 'auth', component: Auth, meta: { guestOnly: true } },
-  { path: '/reader', name: 'reader', component: Reader, meta: { requireAuth: true } },
+  { path: '/reader', name: 'reader', component: Reader, meta: { requireAuth: true } ,
+    children: [
+      {path:'addsource', name:'addsource', component: AddSource}
+    ]  
+  },
+  
   { path: '*', redirect: '/home' }
 ]
 

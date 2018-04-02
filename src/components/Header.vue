@@ -1,7 +1,7 @@
 <template>
   <div>
     <nav class="navbar navbar-expand-lg navbar-light bg-dark">
-        <a class="navbar-brand myBrand" href="#">
+        <a class="navbar-brand" href="#">
             Reader 
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -11,10 +11,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">                   
-                    <button class="btn btn-default mygroup">Mark all as read</button>
+                    <button class="btn btn-default app-menu">Mark all as read</button>
                 </li>
                 <li class="nav-item">
-                    <div class="btn-group mygroup" data-toggle="buttons">
+                    <div class="btn-group app-menu" data-toggle="buttons">
                         <label class="btn btn-info active">
                             <input type="radio" name="options" id="option1" autocomplete="off" checked>All
                         </label>
@@ -51,18 +51,18 @@ export default {
 }
 </script>
 <style scoped>
-    .myBrand{
+    .navbar-brand{
         font-style: italic;
         font-weight: bolder;
         color: lightgray;
     }
-    .myBrand:hover{
+    .navbar-brand:hover{
         color: gray;
     }
-    .mygroup{
+    .app-menu{
         margin-right: 10px;
     }
-    .mygroup input[type="radio"]{
+    .app-menu input[type="radio"]{
         display: none;
     }
     .fa-cog:hover{
