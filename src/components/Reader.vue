@@ -2,11 +2,10 @@
   <div>
     <app-header></app-header>
     <app-sidebar class="float-left"></app-sidebar>
-    <img :src="user.photoURL" width="100"> <br>
+    <!--<img :src="user.photoURL" width="100"> <br>
     <h3>{{user.displayName}}</h3>
     <p>{{user.email}}</p>
-    <button @click="logOut">Log out</button>
-    <button @click="gotoAdd">Push</button>
+    <button @click="logOut">Log out</button>-->
     <router-view></router-view>
   </div>
 </template>
@@ -31,9 +30,6 @@
         methods: {
             logOut() {
                 auth.logout()
-            },
-            gotoAdd(){
-                this.$router.push('addsource');//не работает..Uncaught RangeError: Maximum call stack size exceeded
             }
         }
     }

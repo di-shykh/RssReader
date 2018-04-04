@@ -1,4 +1,5 @@
-import Vue from 'vue'
+import Vue from 'vue';
+import $ from 'jquery';
 
 const state = {
     source: null
@@ -49,12 +50,14 @@ const mutations = {
                         sDescr:text,
                         sImg:img,
                         articles
-                    };
-                    //console.log("--------");
-                    //console.log( newSource);
+                    };   
                     state.source=newSource;
+                    console.log(state.source.sDescr);
                 }   
             });
+    },
+    setCategory: (state, category)=>{
+        state.source.category=category;
     }
 }
 
@@ -64,6 +67,9 @@ const actions = {
     },
     findCurrentSource:({ commit,state },str)=>{
         commit('findSource',str);
+    },
+    setCurrentCategory:({ commit,state }, category)=>{
+        commit('setCategory',category);
     }
 }
 

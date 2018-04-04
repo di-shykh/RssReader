@@ -36,7 +36,6 @@
   </div>
 </template>
 <script>
-import $ from 'jquery';
 import AddSource from './AddSource';
 import {router} from '../router';
 import { mapGetters, mapActions } from 'vuex';
@@ -53,64 +52,19 @@ export default {
     source: 'source'
   }),
   methods:{
+     /*
      ...mapActions([
-        'findCurrentSource',
-        'setCurrentSource'
-        ]),
+        'findCurrentSource'
+        ]),*/
       addSourse(){
         this.show=true;
         var strSourece=document.getElementById('sidebar-input').value;
        if (strSourece){
-           this.$store.dispatch('findCurrentSource', strSourece);//error: [vuex] unknown action type: findCurrentSource
-           this.$router.push('addsource');//не работает Uncaught RangeError: Maximum call stack size exceeded
+           this.$store.dispatch('source/findCurrentSource', strSourece);
+           this.$router.push('/reader/addsource');
+           document.getElementById('sidebar-input').value="";
+           this.show=false;
         }
-        /*if (strSourece){
-            $.ajax(strSourece, {
-                accepts:{
-                    xml:"application/rss+xml"
-                },
-                dataType:"xml",
-                success:function(xml) {            
-                    //console.log($(data).find("channel"));
-                    var self = $(xml).find('channel');
-                    var url = $(self).find('link').first().text();
-                    var title = $(self).find('title').first().text();
-                    var text = $(self).find('description').first().text();
-                    var date = $(self).find('pubDate').first().text();
-                    var img=$(self).find('image').find('url').text();
-
-                    var articles=[];
-                    
-                    $(xml).find("item").each(function () { 
-                        var article={};
-                        var el = $(this);
-                        article.title=el.find("title").text();
-                        article.link=el.find("link").text();
-                        article.desription=el.find("description").text();
-                        article.date=el.find('pubDate').text();
-                        var img=el.find('media\\:content,content').attr('url');
-                        if(img===undefined)
-                        img=el.find('media\\:thumbnail,thumbnail').attr('url');
-                        article.img=img;
-                        article.read=false;
-                        article.readLater=false;
-                        articles.push(article);
-                    });
-                    var newSource={
-                        sTitle: title,
-                        sLink:url,
-                        sDescr:text,
-                        sImg:img,
-                        articles
-                    };
-
-                    console.log("--------");
-                    console.log( newSource);//парсится все нормально,но не работает остальное
-                    this.$store.dispatch('setCurrentSource',newSource);//не работает
-                    router.push('/addsource');//не работает Uncaught RangeError: Maximum call stack size exceeded
-                }   
-            });
-        }*/
   }
 }
 }
