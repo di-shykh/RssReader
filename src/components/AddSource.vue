@@ -21,6 +21,7 @@
     </div>
     <div v-show="show" class="menu-for-adding-source">
         <ul class="nav flex-column">
+            <li v-for="cat in userCategories" @click="addSource(cat)">{{cat.category.name}}</li>
             <li class="nav-item" @click="addNewCatecory($event)">+ New category</li>
         </ul>
     </div>
@@ -60,11 +61,20 @@ export default {
       source(){
           return this.$store.getters['source/source'];
       },
+      sources(){
+          return this.$store.getters['userSources/sources'];
+      },
       articles(){
           var art=[];
           for(var i=0;i<3;i++)
             art.push(this.source.articles[i]);
           return art;
+      },
+      userSources(){
+          return this.$store.getters['userSources/sources']
+      },
+      userCategories(){
+          return this.$store.getters['userSources/categories']
       }
   },
   methods:{
@@ -88,11 +98,18 @@ export default {
         }       
       },
       createNewCategory(){
-          if(this.categor){
+          if(this.categor.trim()){
             this.$store.dispatch('source/setCurrentCategory', this.categor);
             this.showFormCat=false;
-            console.log(this.source.category)
+            this.$store.dispatch('source/saveCurrentSource');
+            this.categor='';
           }
+          this.$store.dispatch('userSources/setCurrentSources');
+      },
+      addSource(cat){
+          //console.log(cat.key);
+          this.$store.dispatch('source/setCurrentCategory', cat);
+          this.$store.dispatch('source/saveCurrentSourceInExistCategory');
       }
   }
 }

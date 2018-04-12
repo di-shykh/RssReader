@@ -5,13 +5,15 @@ import App from './App'
 import {router} from '@/router'
 import {store} from '@/store'
 import auth from '@/auth'
-import VueResource from 'vue-resource';
+//import VueResource from 'vue-resource';
+import VueFire from 'vuefire';
 
-Vue.use(VueResource);
+Vue.use(VueFire);
+//Vue.use(VueResource);
 //Vue.http.options.credentials = true;
-Vue.http.headers.common['Access-Control-Allow-Origin'] = '*';
+/*Vue.http.headers.common['Access-Control-Allow-Origin'] = '*';
 Vue.http.headers.common['Content-type'] = 'application/xml';
-Vue.http.headers.common['Access-Control-Allow-Methods']='GET, POST, OPTIONS'; 
+Vue.http.headers.common['Access-Control-Allow-Methods']='GET, POST, OPTIONS'; */
 
 
 Vue.config.productionTip = false

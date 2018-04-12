@@ -16,14 +16,13 @@
              <li class="nav-item">
                 <a class="nav-link" href="">All</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="">Category 1</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="">Category 2</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="">Category 3</a>
+            <li class="nav-item" v-for="cat in userCategories">
+                <a class="nav-link" href="" @click.stop.prevent>{{cat.category.name}}</a>
+                <ul>
+                    <li class="nav-item" v-for="item in cat.category.sources">
+                        <router-link to="" tag="a" @click.stop.prevent>{{item}}</router-link>
+                    </li>
+                </ul>
             </li>
          </ul>
          <ul class="nav nav-pills flex-column">
@@ -45,12 +44,17 @@ export default {
       return{
           show:false,
           someData:'',
-          sources:[]
+          //sources:[]
       }
   },
-  computed: mapGetters({
-    source: 'source'
-  }),
+  computed: {
+    userSources(){
+        return this.$store.getters['userSources/sources']
+    },
+    userCategories(){
+        return this.$store.getters['userSources/categories']
+    }
+  },
   methods:{
      /*
      ...mapActions([
@@ -59,7 +63,7 @@ export default {
       addSourse(){
         this.show=true;
         var strSourece=document.getElementById('sidebar-input').value;
-       if (strSourece){
+       if (strSourece.trim()){
            this.$store.dispatch('source/findCurrentSource', strSourece);
            this.$router.push('/reader/addsource');
            document.getElementById('sidebar-input').value="";

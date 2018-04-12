@@ -15,12 +15,19 @@
  import Header from './Header'
  import Sidebar from './Sidebar'
  import AddSource from './AddSource'
+ import { mapGetters, mapActions } from 'vuex';
 
     export default {
         name: 'reader',
         computed: {
             user() {
                 return this.$store.getters['user/user']
+            },
+            userSources(){
+                return this.$store.getters['userSources/sources']
+            },
+            userCategories(){
+                return this.$store.getters['userSources/categories']
             }
         },
         components:{
@@ -31,6 +38,10 @@
             logOut() {
                 auth.logout()
             }
+        },
+        created(){
+             this.$store.dispatch('userSources/setUserSources');
+             this.$store.dispatch('userSources/setUserCategories')
         }
     }
 </script>
