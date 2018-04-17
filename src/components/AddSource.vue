@@ -104,15 +104,16 @@ export default {
             this.$store.dispatch('source/saveCurrentSource');
             this.categor='';
           }
-         //this.$store.dispatch('userSources/setCurrentSources');
-          //location.reload();
+         this.$store.dispatch('userSources/setCurrentSources');
+         this.$store.dispatch('userSources/setUserCategories')
           this.show=false;
       },
       addSource(cat){
           this.$store.dispatch('source/setCurrentCategory', cat);
           this.$store.dispatch('source/saveCurrentSourceInExistCategory');
           this.show=false;
-         //location.reload();
+          this.$store.dispatch('userSources/setCurrentSources');
+          this.$store.dispatch('userSources/setUserCategories')
       }
   }
 }

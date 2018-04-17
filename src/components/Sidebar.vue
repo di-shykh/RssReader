@@ -64,14 +64,20 @@ export default {
            document.getElementById('sidebar-input').value="";
            this.show=false;
         }
+  },
+  beforeUpdate(){ 
+      var sidebarWidth=document.querySelector('nav.sidebar').clientWidth;
+      var sidebarFooter=document.querySelector('.sidebar-footer');
+      sidebarFooter.clientWidth=sidebarWidth;
+      alert(sidebarWidth,sidebarFooter.clientWidth);
   }
 }
 }
 </script>
 <style scoped>
     .app-sidebar{
-        background: rgba(219, 228, 238, 0.877);
-        height: 100%; /*calc(100vh - 62px); /* 62 pixel is the height of .navbar */
+       background: rgba(219, 228, 238, 0.877);
+       min-height:calc(100vh - 62px); /* 62 pixel is the height of .navbar */
     }
     ul{
         list-style: none;
@@ -88,9 +94,6 @@ export default {
         width: 100%;
     }
     /*.sidebar-footer {
-        position: absolute; 
-        bottom: 0px;
-        width: 127px;
     }*/
 
 </style>
