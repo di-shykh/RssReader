@@ -28,9 +28,12 @@
                     <i class="fas fa-cog"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">{{user.displayName}}<br>
+                            {{user.email}}</a>
+                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Settings</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Log out</a>
+                        <a class="dropdown-item" href="#" @click="logOut">Log out</a>
                     </div>
                 </li>
             </ul>
@@ -39,15 +42,23 @@
   </div>
 </template>
 <script>
+import auth from '@/auth';
 export default {
     data(){
-        return{
+    return{
 
+    }
+    },
+    computed: {
+        user() {
+            return this.$store.getters['user/user']
         }
     },
-  methods:{
-
-  }
+    methods:{
+        logOut() {
+                    auth.logout()
+                }
+    }
 }
 </script>
 <style scoped>

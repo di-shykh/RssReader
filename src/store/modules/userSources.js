@@ -23,10 +23,12 @@ const mutations = {
             data.forEach(function(data) {
                 var cat={
                     key:data.key,
-                    category:data.val().category
+                    category:{
+                        name:data.val().category.name,
+                        sources:data.val().category.sources
+                    }
                 };
                 categories.push(cat);
-               // console.log("The " + data.key + " rating is " + data.val().category.name );
              });
          }, function (error) {
             console.log("Error: " + error.code) ;
@@ -46,7 +48,6 @@ const mutations = {
                     source:data.val().source
                 };
                 sources.push(sour);
-                //console.log("The " + data.key + " rating is " + data.val().source.name );
              });
          }, function (error) {
             console.log("Error: " + error.code) ;

@@ -43,8 +43,7 @@ export default {
   data(){
       return{
           show:false,
-          someData:'',
-          //sources:[]
+          someData:''
       }
   },
   computed: {
@@ -56,10 +55,6 @@ export default {
     }
   },
   methods:{
-     /*
-     ...mapActions([
-        'findCurrentSource'
-        ]),*/
       addSourse(){
         this.show=true;
         var strSourece=document.getElementById('sidebar-input').value;
@@ -76,8 +71,7 @@ export default {
 <style scoped>
     .app-sidebar{
         background: rgba(219, 228, 238, 0.877);
-        height: calc(100vh - 62px); /* 62 pixel is the height of .navbar */
-
+        height: 100%; /*calc(100vh - 62px); /* 62 pixel is the height of .navbar */
     }
     ul{
         list-style: none;
@@ -93,11 +87,11 @@ export default {
     .sidebar-input{
         width: 100%;
     }
-    .sidebar-footer {
+    /*.sidebar-footer {
         position: absolute; 
         bottom: 0px;
         width: 127px;
-    }
+    }*/
 
 </style>
 

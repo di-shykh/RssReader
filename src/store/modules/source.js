@@ -4,7 +4,8 @@ import auth from '@/auth';
 import firebase from 'firebase';
 
 const state = {
-    source: null
+    source: null,
+    flag:false
 }
 
 const getters = {
@@ -61,7 +62,17 @@ const mutations = {
             });
     },
     setCategory: (state, category)=>{
-        state.source.category=category;
+        if(!category.key){
+            state.source.category=category;
+            state.flag=true
+        }
+        else{
+            state.source.category={
+                key:category.key,
+                name:category.name,
+                sources:category.sources
+            };
+        }
     },
     saveSource:(state)=>{
         var db=firebase.database();
@@ -73,9 +84,14 @@ const mutations = {
             img:state.source.sImg,
             link:state.source.sLink,
             rssLink:state.source.rssLink,
-            category:state.source.category,
             articles:state.source.articles
         };
+        if (state.flag){           
+            source.category=state.source.category;
+        }
+        else{
+            source.category=state.source.category.name;
+        }     
         var category={
             name:state.source.category,
             sources:[source.name]
@@ -96,16 +112,20 @@ const mutations = {
             category:state.source.category.name,
             articles:state.source.articles
         };
-       var cat= userDb.child('categories/'+state.source.category.key);//вот тут проблема...
-       var category={
-            name:state.source.category.name,
-            sources:[source.name]
-        };
-        console.log(state.source.category.sources);
-        //state.source.category.sources.push(source.name);
-        //cat.update({category})
-        //cat.update(source.name);
-        //userDb.child('sources').push({source});
+       var cat= userDb.child('categories/'+state.source.category.key);
+       if(state.source.category.sources.includes(source.name)){
+            alert("This source already exists!")
+       }
+       else{
+        state.source.category.sources.push(source.name);
+        var category={
+             name:state.source.category.name,
+             sources:state.source.category.sources
+         };
+         cat.set({category:{name:state.source.category.name,
+             sources:state.source.category.sources}});
+         userDb.child('sources').push({source});
+       }
     }
 }
 

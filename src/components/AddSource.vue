@@ -21,7 +21,7 @@
     </div>
     <div v-show="show" class="menu-for-adding-source">
         <ul class="nav flex-column">
-            <li v-for="cat in userCategories" @click="addSource(cat)">{{cat.category.name}}</li>
+            <li v-for="cat in userCategories" @click="addSource({key:cat.key,name:cat.category.name,sources:cat.category.sources})">{{cat.category.name}}</li>
             <li class="nav-item" @click="addNewCatecory($event)">+ New category</li>
         </ul>
     </div>
@@ -104,12 +104,15 @@ export default {
             this.$store.dispatch('source/saveCurrentSource');
             this.categor='';
           }
-          this.$store.dispatch('userSources/setCurrentSources');
+         //this.$store.dispatch('userSources/setCurrentSources');
+          //location.reload();
+          this.show=false;
       },
       addSource(cat){
-          //console.log(cat.key);
           this.$store.dispatch('source/setCurrentCategory', cat);
           this.$store.dispatch('source/saveCurrentSourceInExistCategory');
+          this.show=false;
+         //location.reload();
       }
   }
 }
