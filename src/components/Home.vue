@@ -9,15 +9,15 @@
 </script>
 
 <style scoped>
-  .first-page{
-    padding: 100px;
-    margin: 100px auto;
-    }
-    .first-page p{
-    margin: 20px;
-    font-size: 2em
-    }
-    .first-page button{
-    margin: 20px;
-    }
+.first-page {
+  padding: 100px;
+  margin: 100px auto;
+}
+.first-page p {
+  margin: 20px;
+  font-size: 2em;
+}
+.first-page button {
+  margin: 20px;
+}
 </style>

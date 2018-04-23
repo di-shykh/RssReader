@@ -5,16 +5,16 @@
 </template>
 
 <script>
-import auth from '@/auth'
+import auth from '@/auth';
 
-  export default {
-    name: 'auth',
-     mounted() {
-      auth.authForm('#firebaseui-auth-container')
-    }
+export default {
+  name: 'auth',
+  mounted() {
+    auth.authForm('#firebaseui-auth-container');
   }
+};
 </script>
 
 <style>
-    @import "../../node_modules/firebaseui/dist/firebaseui.css";
+@import '../../node_modules/firebaseui/dist/firebaseui.css';
 </style>

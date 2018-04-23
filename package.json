@@ -7,11 +7,17 @@
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "lint": "eslint --ext .js,.vue src test",
+    "lint-autofix": "eslint --ext .js,.vue src test --fix",
+    "eslint-check": "eslint --print-config .eslintrc.js | eslint-config-prettier-check",
+    "format": "prettier --write '**/*.{js,jsx}'"
   },
   "dependencies": {
+    "eslint-config-prettier": "^2.9.0",
     "firebase": "^4.11.0",
     "firebaseui": "^2.6.2",
+    "husky": "^0.14.3",
     "jquery": "^3.3.1",
     "vue": "^2.5.2",
     "vue-resource": "^1.5.0",
@@ -32,6 +38,11 @@
     "chalk": "^2.0.1",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.0",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-vue": "^4.5.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.4",
     "friendly-errors-webpack-plugin": "^1.6.1",
