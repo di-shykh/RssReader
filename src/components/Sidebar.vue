@@ -57,7 +57,7 @@ export default {
   methods: {
     addSource() {
       this.show = true;
-      var strSource = document.getElementById('sidebar-input').value;
+      const strSource = document.getElementById('sidebar-input').value;
       if (strSource.trim()) {
         this.$store.dispatch('source/findCurrentSource', strSource);
         this.$router.push('/reader/addsource');
@@ -88,8 +88,6 @@ ul {
 .sidebar-input {
   width: 100%;
 }
-/*.sidebar-footer {
-    }*/
 </style>
 
 

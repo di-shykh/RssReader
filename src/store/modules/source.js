@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import $ from 'jquery';
 import auth from '@/auth';
 import firebase from 'firebase';
 
@@ -17,70 +16,110 @@ const mutations = {
     state.source = source;
   },
   findSource: (state, URL) => {
-    var xmlhttp;
-    if (window.XMLHttpRequest) {
-      // code for IE7+, Firefox, Chrome, Opera, Safari
-      xmlhttp = new XMLHttpRequest();
-    } else {
-      // code for IE6, IE5
-      xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
-    }
-    xmlhttp.open('GET', URL, false);
-    xmlhttp.send();
-    var xmlDoc = xmlhttp.responseXML;
-    var x = xmlDoc.getElementsByTagName('channel');
+    try {
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.open('GET', URL, false);
+      xmlhttp.send();
+      const xmlDoc = xmlhttp.responseXML;
+      if (xmlDoc.evaluate) {
+        function findItemValue(xpath) {
+          return xmlDoc
+            .evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null)
+            .iterateNext().childNodes[0].nodeValue;
+        }
+        const title = findItemValue('//channel/title');
+        const url = findItemValue('//channel/link');
+        const text = findItemValue('//channel/description');
+        const date = findItemValue('//channel/pubDate')
+          ? findItemValue('//channel/pubDate')
+          : findItemValue('//channel/lastBuildDate');
+        let img = '';
+        if (findItemValue('//channel/image/url'))
+          img = findItemValue('//channel/image/url');
 
-    var url = x[0].getElementsByTagName('link')[0].childNodes[0].nodeValue;
-    var title = x[0].getElementsByTagName('title')[0].childNodes[0].nodeValue;
-    var text = x[0].getElementsByTagName('description')[0].childNodes[0]
-      .nodeValue;
-    var date = x[0].getElementsByTagName('pubDate')[0].childNodes[0].nodeValue;
-    if (x[0].getElementsByTagName('image')[0])
-      var img = x[0]
-        .getElementsByTagName('image')[0]
-        .getElementsByTagName('url')[0].childNodes[0].nodeValue;
+        const articles = [];
+        const nodesSnapshot = xmlDoc.evaluate(
+          '//channel/item',
+          xmlDoc,
+          null,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        );
 
-    var item = xmlDoc.getElementsByTagName('item');
-    var articles = [];
+        for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+          let article = {
+            title: '',
+            link: '',
+            description: '',
+            date: '',
+            img: '',
+            read: false,
+            readLater: false
+          };
+          article.title = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('title')[0].textContent;
+          article.link = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('link')[0].textContent;
+          article.description = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('description')[0].textContent;
+          article.date = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('pubDate')[0].textContent;
+          articles.push(article);
+        }
+        var namespaceResolver = (function() {
+          var prefixMap = {
+            media: 'http://search.yahoo.com/mrss/',
+            ynews: 'http://news.yahoo.com/rss/'
+          };
 
-    for (let j = 0; j < item.length; j++) {
-      var article = {};
-      article.title = item[j].getElementsByTagName(
-        'title'
-      )[0].childNodes[0].nodeValue;
-      article.link = item[j].getElementsByTagName(
-        'link'
-      )[0].childNodes[0].nodeValue;
-      article.description = item[j].getElementsByTagName(
-        'description'
-      )[0].childNodes[0].nodeValue;
-      article.date = item[j].getElementsByTagName(
-        'pubDate'
-      )[0].childNodes[0].nodeValue;
-      var img;
-      if (item[j].getElementsByTagName('media:content')[0])
-        img = item[j]
-          .getElementsByTagName('media:content')[0]
-          .getAttribute('url');
-      if (item[j].getElementsByTagName('media:thumbnail')[0]) {
-        img = item[j]
-          .getElementsByTagName('media:thumbnail')[0]
-          .getAttribute('url');
+          return function(prefix) {
+            return prefixMap[prefix] || null;
+          };
+        })();
+        const articlesImg = xmlDoc.evaluate(
+          '//channel/item/media:thumbnail/@url',
+          xmlDoc,
+          namespaceResolver,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        )
+          ? xmlDoc.evaluate(
+              '//channel/item/media:thumbnail/@url',
+              xmlDoc,
+              namespaceResolver,
+              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+              null
+            )
+          : xmlDoc.evaluate(
+              '//channel/item/media:content/@url',
+              xmlDoc,
+              namespaceResolver,
+              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+              null
+            );
+
+        for (let i = 0; i < articlesImg.snapshotLength; i++) {
+          articles[i].img = articlesImg.snapshotItem(i).textContent;
+        }
+
+        const newSource = {
+          sTitle: title,
+          sLink: url,
+          sDescr: text,
+          sImg: img,
+          rssLink: URL,
+          articles
+        };
+        state.source = newSource;
       }
-      if (img === undefined) img = '';
-      article.read = false;
-      article.readLater = false;
-      articles.push(article);
+    } catch (error) {
+      console.error(error);
+      alert("Unfortunately we can't save this blog");
     }
-    var newSource = {
-      sTitle: title,
-      sLink: url,
-      sDescr: text,
-      sImg: img,
-      rssLink: URL,
-      articles
-    };
-    state.source = newSource;
   },
   setCategory: (state, category) => {
     if (!category.key) {
@@ -95,10 +134,10 @@ const mutations = {
     }
   },
   saveSource: state => {
-    var db = firebase.database();
-    var id = auth.user().uid;
-    var userDb = db.ref(id);
-    var source = {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const source = {
       name: state.source.sTitle,
       description: state.source.sDescr,
       img: state.source.sImg,
@@ -111,7 +150,7 @@ const mutations = {
     } else {
       source.category = state.source.category.name;
     }
-    var category = {
+    const category = {
       name: state.source.category,
       sources: [source.name]
     };
@@ -119,10 +158,10 @@ const mutations = {
     userDb.child('sources').push({ source });
   },
   saveSourceInExistCategory: state => {
-    var db = firebase.database();
-    var id = auth.user().uid;
-    var userDb = db.ref(id);
-    var source = {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const source = {
       name: state.source.sTitle,
       description: state.source.sDescr,
       img: state.source.sImg,
@@ -131,12 +170,12 @@ const mutations = {
       category: state.source.category.name,
       articles: state.source.articles
     };
-    var cat = userDb.child('categories/' + state.source.category.key);
+    const cat = userDb.child('categories/' + state.source.category.key);
     if (state.source.category.sources.includes(source.name)) {
       alert('This source already exists!');
     } else {
       state.source.category.sources.push(source.name);
-      var category = {
+      const category = {
         name: state.source.category.name,
         sources: state.source.category.sources
       };

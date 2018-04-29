@@ -7,16 +7,18 @@
     <div class="container">
       <!--<div class="row" v-for="source in sources">-->
       <div class="row article" v-for="article in articles">
-        <div class="date">{{getDate(article.date)}}</div>
-        <div class="w-100"></div>
-        <div class="col-2">
-          <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
-          <!--<div v-html="findImgOfArticle(article.description)" v-else class="img-thumbnail"></div>-->
-        </div>
-        <div class="col-10">
-          <h6>{{article.title}}</h6> 
-          <p v-html="deleteImgTagFromDescr(article.description)"></p>
-        </div>
+        <router-link :to="{ name: 'article', params: { article: article }}" tag="div" @click.stop.prevent>
+          <div class="date">{{getDate(article.date)}}</div>
+          <div class="w-100"></div>
+          <div class="col-2">
+            <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
+            <!--<div v-html="findImgOfArticle(article.description)" v-else class="img-thumbnail"></div>-->
+          </div>
+          <div class="col-10">
+            <h6>{{article.title}}</h6> 
+            <p v-html="deleteImgTagFromDescr(article.description)"></p>
+          </div>
+        </router-link>
       </div>
       </div>
     </div>

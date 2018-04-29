@@ -14,16 +14,16 @@ const getters = {
 
 const mutations = {
   setCategories: state => {
-    var categories = [];
-    var db = firebase.database();
-    var id = auth.user().uid;
-    var userDb = db.ref(id);
-    var cat = userDb.child('categories');
+    const categories = [];
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const cat = userDb.child('categories');
     cat.on(
       'value',
       function(data) {
         data.forEach(function(data) {
-          var cat = {
+          let cat = {
             key: data.key,
             category: {
               name: data.val().category.name,
@@ -47,16 +47,16 @@ const mutations = {
     state.categories = categories;
   },
   setSources: state => {
-    var sources = [];
-    var db = firebase.database();
-    var id = auth.user().uid;
-    var userDb = db.ref(id);
-    var cat = userDb.child('sources');
+    const sources = [];
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const cat = userDb.child('sources');
     cat.on(
       'value',
       function(data) {
         data.forEach(function(data) {
-          var sour = {
+          let sour = {
             key: data.key,
             source: data.val().source
           };

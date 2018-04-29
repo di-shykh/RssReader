@@ -54,8 +54,8 @@ export default {
   },
   watch: {
     category() {
-      var menu = document.querySelector('.menu-for-adding-category');
-      var submitButton = menu.querySelector('.btn-success');
+      const menu = document.querySelector('.menu-for-adding-category');
+      const submitButton = menu.querySelector('.btn-success');
       if (this.category) {
         submitButton.removeAttribute('disabled');
       }
@@ -81,7 +81,7 @@ export default {
   methods: {
     addNewSource(event) {
       this.show = !this.show;
-      var menu = document.querySelector('.menu-for-adding-source');
+      const menu = document.querySelector('.menu-for-adding-source');
       this.x = event.screenX;
       this.y = event.screenY;
       if (menu) {
@@ -92,7 +92,7 @@ export default {
     addNewCatecory() {
       this.show = false;
       this.showFormCat = !this.showFormCat;
-      var menu = document.querySelector('.menu-for-adding-category');
+      const menu = document.querySelector('.menu-for-adding-category');
       if (menu) {
         menu.style.left = `${this.x - 230}px`;
         menu.style.top = `${this.y - 35}px`;

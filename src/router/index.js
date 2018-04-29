@@ -7,10 +7,11 @@ import Reader from '../components/Reader';
 import Home from '../components/Home';
 import AddSource from '../components/AddSource';
 import Articles from '../components/Articles';
+import Article from '../components/Article';
 
 Vue.use(Router);
 
-var routes = [
+const routes = [
   { path: '', name: 'home', component: Home },
   { path: '/auth', name: 'auth', component: Auth, meta: { guestOnly: true } },
   {
@@ -38,6 +39,11 @@ var routes = [
         path: 'category/:categoryname',
         name: 'articlesbycategory',
         component: Articles
+      },
+      {
+        path: 'article/:article',
+        name: 'article',
+        component: Article
       }
     ]
   },
