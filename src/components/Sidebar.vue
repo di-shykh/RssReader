@@ -1,37 +1,42 @@
 <template>
-  <div class=" app-sidebar">
-      <nav class="sidebar bg-faded">
-          <ul class="nav nav-pills flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="">Latest articles</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="">Read later</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="">Sources <i class="fas fa-cog"></i></a>
-            </li>
+  <div class=" app-sidebar" @click="openSidebar">
+    <div class="sidebar-toggle" v-if="!showSidebar">
+        <a>
+          <i class="fa fa-bars fa-2x" aria-hidden="true"></i>
+        </a>
+    </div>
+    <nav class="sidebar bg-faded" v-if="showSidebar">
+        <ul class="nav nav-pills flex-column">
+          <li class="nav-item">
+              <a class="nav-link" href="">Latest articles</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="">Read later</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="">Sources <i class="fas fa-cog"></i></a>
+          </li>
+      </ul>
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item" @click.stop.prevent="closeSidebar">
+              <router-link to="/reader/articles" tag="a">All</router-link>
+          </li>
+          <li class="nav-item" v-for="cat in userCategories" @click.stop.prevent="closeSidebar">
+              <router-link tag="a" class="nav-link" :to="{ name: 'articlesbycategory', params: { categoryname: cat.category.name }}">{{cat.category.name}}</router-link>
+              <ul>
+                  <li class="nav-item" v-for="item in cat.category.sources" @click.stop.prevent="closeSidebar">
+                      <router-link :to="{ name: 'articlesbysourcename', params: { sourcename: item }}" tag="a" >{{item}}</router-link>
+                  </li>
+              </ul>
+          </li>
         </ul>
-         <ul class="nav nav-pills flex-column">
-             <li class="nav-item">
-                <router-link to="/reader/articles" tag="a" @click.stop.prevent>All</router-link>
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item sidebar-footer">
+                <input id="sidebar-input" class="form-control sidebar-input" type="text" v-show="show" @keyup.enter="addSource">
+                <button class="btn sidebar-button" @click="addSource">+Add</button>
             </li>
-            <li class="nav-item" v-for="cat in userCategories">
-                <router-link tag="a" class="nav-link" :to="{ name: 'articlesbycategory', params: { categoryname: cat.category.name }}" @click.stop.prevent>{{cat.category.name}}</router-link>
-                <ul>
-                    <li class="nav-item" v-for="item in cat.category.sources">
-                        <router-link :to="{ name: 'articlesbysourcename', params: { sourcename: item }}" tag="a" @click.stop.prevent>{{item}}</router-link>
-                    </li>
-                </ul>
-            </li>
-         </ul>
-         <ul class="nav nav-pills flex-column">
-             <li class="nav-item sidebar-footer">
-                 <input id="sidebar-input" class="form-control sidebar-input" type="text" v-show="show" @keyup.enter="addSource">
-                 <button class="btn sidebar-button" @click="addSource">+Add</button>
-             </li>
-         </ul>   
-      </nav>     
+        </ul>   
+    </nav>     
   </div>
 </template>
 
@@ -52,6 +57,9 @@ export default {
     },
     userCategories() {
       return this.$store.getters['userSources/categories'];
+    },
+    showSidebar() {
+      return this.$store.getters['appearance/showSidebar'];
     }
   },
   methods: {
@@ -64,6 +72,17 @@ export default {
         document.getElementById('sidebar-input').value = '';
         this.show = false;
       }
+    },
+    openSidebar() {
+      this.$store.dispatch('appearance/openWideSidebar');
+    },
+    closeSidebar() {
+      this.$store.dispatch('appearance/closeWideSidebar');
+    }
+  },
+  updated() {
+    if (this.showSidebar) {
+      this.$store.dispatch('appearance/openWideSidebar');
     }
   }
 };
@@ -73,6 +92,7 @@ export default {
   background: rgba(219, 228, 238, 0.877);
   min-height: calc(100vh - 62px); /* 62 pixel is the height of .navbar */
   position: fixed;
+  cursor: pointer;
 }
 ul {
   list-style: none;
@@ -87,6 +107,9 @@ ul {
 }
 .sidebar-input {
   width: 100%;
+}
+.fa-bars {
+  margin: 10px;
 }
 </style>
 

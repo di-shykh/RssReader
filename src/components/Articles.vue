@@ -90,15 +90,6 @@ export default {
         .join(' ');
     }
   },
-  created() {
-    //this.$store.dispatch('userSources/setUserSources');
-    //this.$store.dispatch('userSources/setUserCategories');
-  },
-  mounted() {
-    const content = document.getElementById('app-content');
-    const sidebar = document.getElementById('app-sidebar');
-    content.style.marginLeft = sidebar.clientWidth + 'px';
-  },
   components: {
     artHeader: ArtHeader
   }

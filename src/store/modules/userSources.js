@@ -72,6 +72,20 @@ const mutations = {
       }
     );
     state.sources = sources;
+  },
+  saveExistingArticle: (state, article) => {
+    /*const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const source = userDb.child('sources/' + state.source.source.key);*/
+    console.log(article);
+    state.sources.forEach(function(data) {
+      console.log('key:', data.key);
+      console.log('source:', data.source);
+      data.source.forEach(function(item) {
+        console.log(item.articles);
+      });
+    });
   }
 };
 
@@ -81,6 +95,9 @@ const actions = {
   },
   setUserCategories: ({ commit, state }) => {
     commit('setCategories');
+  },
+  saveCurrentArticle: ({ commit, state }, article) => {
+    commit('saveExistingArticle', article);
   }
 };
 

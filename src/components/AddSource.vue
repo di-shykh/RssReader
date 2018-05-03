@@ -120,14 +120,14 @@ export default {
     }
   },
   mounted() {
-    const content = document.getElementById('app-content');
+    /*const content = document.getElementById('app-content');
     const sidebar = document.getElementById('app-sidebar');
-    content.style.marginLeft = sidebar.clientWidth + 'px';
+    content.style.marginLeft = sidebar.clientWidth + 'px';*/
   },
   created() {
-    const content = document.getElementById('app-content');
+    /*const content = document.getElementById('app-content');
     const sidebar = document.getElementById('app-sidebar');
-    content.style.marginLeft = sidebar.clientWidth + 'px';
+    content.style.marginLeft = sidebar.clientWidth + 'px';*/
   }
 };
 </script>

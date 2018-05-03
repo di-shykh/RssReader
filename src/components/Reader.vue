@@ -3,7 +3,9 @@
     <app-header class="fixed-top"></app-header>
     <app-sidebar id="app-sidebar" class="float-left"></app-sidebar>
     <!--<img :src="user.photoURL" width="100"> <br>-->
-    <router-view id="app-content"></router-view>
+    <div @click="closeSidebar">
+      <router-view id="app-content" ></router-view>
+    </div>
   </div>
 </template>
 
@@ -35,11 +37,18 @@ export default {
   methods: {
     logOut() {
       auth.logout();
+    },
+    closeSidebar() {
+      this.$store.dispatch('appearance/closeWideSidebar');
     }
   },
   created() {
     this.$store.dispatch('userSources/setUserSources');
     this.$store.dispatch('userSources/setUserCategories');
+    this.$router.push('/reader/articles');
+    const headerHeigth = document.querySelector('.app-header nav').offsetHeight;
+    const sidebar = document.querySelector('.app-sidebar');
+    sidebar.style.top = `${headerHeigth}px`;
   }
 };
 </script>

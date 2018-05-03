@@ -61,10 +61,12 @@ export default {
         icon.classList.remove('fa-bookmark-o');
         icon.classList.add('fa-bookmark');
         this.article.readLater = true;
+        this.$store.dispatch('userSources/saveCurrentArticle', this.article);
       } else {
         icon.classList.remove('fa-bookmark');
         icon.classList.add('fa-bookmark-o');
         this.article.readLater = false;
+        this.$store.dispatch('userSources/saveCurrentArticle', this.article);
       }
     }
   },

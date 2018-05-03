@@ -4,6 +4,7 @@ import Vuex from 'vuex';
 import user from './modules/user';
 import source from './modules/source';
 import userSources from './modules/userSources';
+import appearance from './modules/appearance';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ export const store = new Vuex.Store({
   modules: {
     user,
     source,
-    userSources
+    userSources,
+    appearance
   }
 });
