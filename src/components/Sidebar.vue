@@ -1,11 +1,11 @@
 <template>
   <div class=" app-sidebar" @click="openSidebar">
-    <div class="sidebar-toggle" v-if="!showSidebar">
+    <div class="sidebar-toggle" v-show="!isSidebarVisible">
         <a>
           <i class="fa fa-bars fa-2x" aria-hidden="true"></i>
         </a>
     </div>
-    <nav class="sidebar bg-faded" v-if="showSidebar">
+    <nav class="sidebar bg-faded" v-show="isSidebarVisible">
         <ul class="nav nav-pills flex-column">
           <li class="nav-item">
               <a class="nav-link" href="">Latest articles</a>
@@ -58,7 +58,7 @@ export default {
     userCategories() {
       return this.$store.getters['userSources/categories'];
     },
-    showSidebar() {
+    isSidebarVisible() {
       return this.$store.getters['appearance/showSidebar'];
     }
   },
@@ -81,7 +81,7 @@ export default {
     }
   },
   updated() {
-    if (this.showSidebar) {
+    if (this.isSidebarVisible) {
       this.$store.dispatch('appearance/openWideSidebar');
     }
   }

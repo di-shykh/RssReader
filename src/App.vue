@@ -14,7 +14,6 @@ export default {
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
   height: 100%;
 }
 </style>

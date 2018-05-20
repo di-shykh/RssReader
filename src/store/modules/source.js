@@ -47,7 +47,7 @@ const mutations = {
         );
 
         for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-          let article = {
+          const article = {
             title: '',
             link: '',
             description: '',

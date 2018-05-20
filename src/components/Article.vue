@@ -4,18 +4,17 @@
       <div class="col-3 date">{{getDate(article.date)}}</div>
       <h4 class="col-6">{{article.title}}</h4>
       <div class="col-3">
-        <a @click.stop.prevent="markAsReadLater"><i id="icon" class="fa fa-bookmark-o fa-2x" aria-hidden="true"></i></a>
+        <a @click.stop.prevent="markAsReadLater"><i id="icon" v-bind:class="classObj" aria-hidden="true"></i></a>
         <a @click.stop.prevent><i class="fa fa-share-alt fa-2x" aria-hidden="true"></i></a>
       </div>
     </div>
     <div class="row">
       <div class="col-4">
         <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
-        <!--<div v-html="findImgOfArticle(article.description)" v-else class="img-thumbnail"></div>-->
       </div>
       <div class="col-8" v-html="deleteImgTagFromDescr(article.description)"></div>
       <div class="w-100"></div>
-      <button class="btn btn-primary col-md-4 offset-md-4" @click="openInNewTab(article.link)">Visit website</button>
+      <a :href=article.link target="_blank"  class="btn btn-primary col-md-4 offset-md-4">Visit website</a>
     </div>
   </div>
 </template>
@@ -37,13 +36,17 @@ export default {
     },
     categories() {
       return this.$store.getters['userSources/categories'];
+    },
+    readLater() {
+      return this.article.readLater;
+    },
+    classObj() {
+      return [this.article.readLater ? 'fas' : 'far', 'fa-bookmark', 'fa-2x']; //иконка меняется только после повторного открытия,а не динамически.this.article.readLater и класс меняется динамически. Что я делаю не так?
     }
   },
   methods: {
     deleteImgTagFromDescr(str) {
-      const start = str.indexOf('<img');
-      const end = str.indexOf('/>', start);
-      return str.slice(0, start) + str.slice(end + 2);
+      return str.replace(/<img[^>]*>/gi, '');
     },
     getDate(str) {
       return str
@@ -51,27 +54,20 @@ export default {
         .slice(1, 4)
         .join(' ');
     },
-    openInNewTab(url) {
-      const win = window.open(url, '_blank');
-      win.focus();
-    },
     markAsReadLater() {
-      const icon = document.querySelector('#icon');
-      if (icon.classList.contains('fa-bookmark-o')) {
-        icon.classList.remove('fa-bookmark-o');
-        icon.classList.add('fa-bookmark');
-        this.article.readLater = true;
-        this.$store.dispatch('userSources/saveCurrentArticle', this.article);
-      } else {
-        icon.classList.remove('fa-bookmark');
-        icon.classList.add('fa-bookmark-o');
-        this.article.readLater = false;
-        this.$store.dispatch('userSources/saveCurrentArticle', this.article);
-      }
+      this.article.readLater = !this.article.readLater;
+      let source = this.sources.find(o =>
+        o.source.articles.includes(this.article)
+      );
+      if (source) this.$store.dispatch('userSources/saveCurrentSource', source);
     }
   },
   created() {
     this.article.read = true;
+    let source = this.sources.find(o =>
+      o.source.articles.includes(this.article)
+    );
+    if (source) this.$store.dispatch('userSources/saveCurrentSource', source);
   }
 };
 </script>

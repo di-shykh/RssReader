@@ -12,7 +12,6 @@
           <div class="w-100"></div>
           <div class="col-2">
             <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
-            <!--<div v-html="findImgOfArticle(article.description)" v-else class="img-thumbnail"></div>-->
           </div>
           <div class="col-10">
             <h6>{{article.title}}</h6> 
@@ -49,41 +48,29 @@ export default {
     articles() {
       if (this.sourceName) {
         let source = this.sources.find(o => o.source.name === this.sourceName);
-        return source.source.articles;
+        if (source) return source.source.articles;
       }
       if (this.categoryName) {
-        let art = [];
-        this.sources.forEach(item => {
-          if (item.source.category == this.categoryName) {
-            art.push(...item.source.articles);
-          }
-        });
+        let art = this.sources
+          .filter(item => item.source.category === this.categoryName)
+          .reduce(([], item) => [...item.source.articles]); //if there are several sources in the category, then everything is displayed correctly. If there is only one, then art is the source object
+        if (!Array.isArray(art)) art = art.source.articles;
         return art;
       } else {
         let art = [];
         this.sources.forEach(item => {
           art.push(...item.source.articles);
         });
+        //let art = this.sources.reduce(([], item) => [...item.source.articles]); //не работает..и [].concat(item.source.articles) тоже не работает..Почему?
         return art;
       }
     }
-    /*date(str) {
-      return new Date(Date.parse(str)).toISOString().substr(0, 10);
-    }*/
   },
   methods: {
     deleteImgTagFromDescr(str) {
-      const start = str.indexOf('<img');
-      const end = str.indexOf('/>', start);
-      return str.slice(0, start) + str.slice(end + 2, 500) + '...'; //and make description not so long
-    },
-    findImgOfArticle(str) {
-      const start = str.indexOf('<img');
-      const end = str.indexOf('/>', start);
-      return str.slice(start, end + 2);
+      return str.replace(/<img[^>]*>/gi, '').slice(0, 500) + '...'; //and make description not so long
     },
     getDate(str) {
-      //console.log(new Date(Date.parse(str)).toISOString().substr(0, 10));
       return str
         .split(' ')
         .slice(1, 4)

@@ -4,11 +4,10 @@
       <div class="input-group">
         <input type="text" class="form-control" placeholder="Search">
         <span class="input-group-btn">
-            <i class="fa fa-list fa-2x" aria-hidden="true"></i>
+            <i class="fas fa-list fa-2x" aria-hidden="true"></i>
         </span>
-        <!--<i class="fa fa-bars" aria-hidden="true"></i>-->
         <span class="input-group-btn">
-            <i class="fa fa-refresh fa-2x" aria-hidden="true"></i>
+            <i class="fas fa-sync-alt fa-2x" aria-hidden="true"></i>
         </span>
       </div>
     </div>
