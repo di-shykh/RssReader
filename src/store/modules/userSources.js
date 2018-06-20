@@ -56,16 +56,12 @@ const mutations = {
       'value',
       function(data) {
         data.forEach(function(data) {
-          let sour = {
+          let source = {
             key: data.key,
             source: data.val().source
           };
-          sources.push(sour);
+          sources.push(source);
         });
-        /*sources = data.map(element => ({
-          key: element.key,
-          source: element.val().source
-        }));*/ //I don't know why,but it doesn't work..
       },
       function(error) {
         console.log('Error: ' + error.code);
@@ -73,21 +69,39 @@ const mutations = {
     );
     state.sources = sources;
   },
-  saveExistingSource: (state, source) => {
+  /*saveExistingSource: (state, source) => {
+    +    const db = firebase.database();
+    +    const id = auth.user().uid;
+    +    const userDb = db.ref(id);
+    +    const sourceRef = userDb.child('sources/' + source.key);
+    +    sourceRef.set({
+    +      source: {
+    +        name: source.source.name,
+    +        description: source.source.description,
+    +        img: source.source.img,
+    +        link: source.source.link,
+    +        rssLink: source.source.rssLink,
+    +        category: source.source.category,
+    +        articles: source.source.articles
+    +      }
+    +    });
+    +  } использовать потом для сохранения изменений в источнике. Это не мертвый код,он мне еще нужен:)*/
+  saveExistingArticle: (state, art) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const sourceRef = userDb.child('sources/' + source.key);
-    sourceRef.set({
-      source: {
-        name: source.source.name,
-        description: source.source.description,
-        img: source.source.img,
-        link: source.source.link,
-        rssLink: source.source.rssLink,
-        category: source.source.category,
-        articles: source.source.articles
-      }
+    const articleRef = userDb.child(
+      'sources/' + art.source.key + '/source/articles/' + art.article_key
+    );
+    const article = art.article;
+    articleRef.set({
+      title: article.title,
+      link: article.link,
+      description: article.description,
+      date: article.date,
+      img: article.img,
+      read: article.read,
+      readLater: article.readLater
     });
   }
 };
@@ -99,8 +113,8 @@ const actions = {
   setUserCategories: ({ commit, state }) => {
     commit('setCategories');
   },
-  saveCurrentSource: ({ commit, state }, source) => {
-    commit('saveExistingSource', source);
+  saveCurrentArticle: ({ commit, state }, art) => {
+    commit('saveExistingArticle', art);
   }
 };
 

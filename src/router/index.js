@@ -8,6 +8,7 @@ import Home from '../components/Home';
 import AddSource from '../components/AddSource';
 import Articles from '../components/Articles';
 import Article from '../components/Article';
+import Sources from '../components/Sources';
 
 Vue.use(Router);
 
@@ -41,9 +42,14 @@ const routes = [
         component: Articles
       },
       {
-        path: 'article/:article',
+        path: 'article/:article/:article_key',
         name: 'article',
         component: Article
+      },
+      {
+        path: 'sources',
+        name: 'sources',
+        component: Sources
       }
     ]
   },

@@ -14,7 +14,7 @@
               <a class="nav-link" href="">Read later</a>
           </li>
           <li class="nav-item">
-              <a class="nav-link" href="">Sources <i class="fas fa-cog"></i></a>
+            <router-link tag="a" class="nav-link" :to="{ name: 'sources'}">Sources <i class="fas fa-cog"></i></router-link>
           </li>
       </ul>
         <ul class="nav nav-pills flex-column">
@@ -91,8 +91,11 @@ export default {
 .app-sidebar {
   background: rgba(219, 228, 238, 0.877);
   min-height: calc(100vh - 62px); /* 62 pixel is the height of .navbar */
-  position: fixed;
   cursor: pointer;
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  order: 0;
+  flex-direction: column;
 }
 ul {
   list-style: none;

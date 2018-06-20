@@ -4,7 +4,7 @@
       <div class="col-3 date">{{getDate(article.date)}}</div>
       <h4 class="col-6">{{article.title}}</h4>
       <div class="col-3">
-        <a @click.stop.prevent="markAsReadLater"><i id="icon" v-bind:class="classObj" aria-hidden="true"></i></a>
+        <a @click.stop.prevent="markAsReadLater"><i id="icon" v-bind:class="[this.article.readLater ? 'fas' : 'far', 'fa-bookmark', 'fa-2x']" aria-hidden="true"></i></a>
         <a @click.stop.prevent><i class="fa fa-share-alt fa-2x" aria-hidden="true"></i></a>
       </div>
     </div>
@@ -22,12 +22,14 @@
 export default {
   data() {
     return {
-      article: this.$route.params.article
+      article: this.$route.params.article,
+      article_key: this.$route.params.article_key
     };
   },
   watch: {
     $route(to, from) {
       this.article = to.params.article;
+      this.article_key = to.params.article_key;
     }
   },
   computed: {
@@ -59,7 +61,12 @@ export default {
       let source = this.sources.find(o =>
         o.source.articles.includes(this.article)
       );
-      if (source) this.$store.dispatch('userSources/saveCurrentSource', source);
+      if (source)
+        this.$store.dispatch('userSources/saveCurrentArticle', {
+          source: source,
+          article_key: this.article_key,
+          article: this.article
+        });
     }
   },
   created() {
@@ -67,7 +74,12 @@ export default {
     let source = this.sources.find(o =>
       o.source.articles.includes(this.article)
     );
-    if (source) this.$store.dispatch('userSources/saveCurrentSource', source);
+    if (source)
+      this.$store.dispatch('userSources/saveCurrentArticle', {
+        source: source,
+        article_key: this.article_key,
+        article: this.article
+      });
   }
 };
 </script>

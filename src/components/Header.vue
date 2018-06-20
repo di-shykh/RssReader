@@ -1,6 +1,6 @@
 <template>
   <div class="app-header">
-    <nav class="navbar navbar-expand-lg navbar-light bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
         <a class="navbar-brand" href="#">
             Reader 
         </a>
@@ -59,10 +59,6 @@ export default {
 };
 </script>
 <style scoped>
-.app-header {
-  position: sticky;
-  height: 62px;
-}
 .navbar-brand {
   font-style: italic;
   font-weight: bolder;

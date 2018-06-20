@@ -5,9 +5,8 @@
     <h2 v-else-if="categoryName">{{categoryName}}</h2>
     <h2 v-else>All</h2>
     <div class="container">
-      <!--<div class="row" v-for="source in sources">-->
-      <div class="row article" v-for="article in articles">
-        <router-link :to="{ name: 'article', params: { article: article }}" tag="div" @click.stop.prevent>
+      <div class="row article" v-for="(article,key) in articles">
+        <router-link :to="{ name: 'article', params: { article: article, article_key:key }}" tag="div" @click.stop.prevent>
           <div class="date">{{getDate(article.date)}}</div>
           <div class="w-100"></div>
           <div class="col-2">
@@ -50,18 +49,17 @@ export default {
         let source = this.sources.find(o => o.source.name === this.sourceName);
         if (source) return source.source.articles;
       }
+      let acc = [];
       if (this.categoryName) {
         let art = this.sources
           .filter(item => item.source.category === this.categoryName)
-          .reduce(([], item) => [...item.source.articles]); //if there are several sources in the category, then everything is displayed correctly. If there is only one, then art is the source object
-        if (!Array.isArray(art)) art = art.source.articles;
+          .reduce((acc, item) => acc.concat(item.source.articles), acc);
         return art;
       } else {
-        let art = [];
-        this.sources.forEach(item => {
-          art.push(...item.source.articles);
-        });
-        //let art = this.sources.reduce(([], item) => [...item.source.articles]); //не работает..и [].concat(item.source.articles) тоже не работает..Почему?
+        let art = this.sources.reduce(
+          (acc, item) => acc.concat(item.source.articles),
+          acc
+        );
         return art;
       }
     }
