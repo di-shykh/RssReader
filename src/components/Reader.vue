@@ -4,7 +4,7 @@
     <div class="wrapper">
       <app-sidebar id="app-sidebar"></app-sidebar>
         <div @click="closeSidebar" id="app-content">
-          <router-view @click="closeSidebar"></router-view>
+          <router-view></router-view>
         </div>
     </div>
   </div>

@@ -4,6 +4,7 @@
     <div class="row col-12">
       <h2 v-if="sourceName">{{sourceName}}</h2>
       <h2 v-else-if="categoryName">{{categoryName}}</h2>
+      <h2 v-else-if="readLater">Bookmared Articles</h2>
       <h2 v-else>All</h2>
     </div>
     <div class="row article" v-for="(article,key) in articles">
@@ -27,13 +28,15 @@ export default {
   data() {
     return {
       sourceName: this.$route.params.sourcename,
-      categoryName: this.$route.params.categoryname
+      categoryName: this.$route.params.categoryname,
+      readLater: this.$route.params.readLater
     };
   },
   watch: {
     $route(to, from) {
       this.sourceName = to.params.sourcename;
       this.categoryName = to.params.categoryname;
+      this.readLater = to.params.readLater;
     }
   },
   computed: {
@@ -53,6 +56,12 @@ export default {
         let art = this.sources
           .filter(item => item.source.category === this.categoryName)
           .reduce((acc, item) => acc.concat(item.source.articles), acc);
+        return art;
+      }
+      if (this.readLater) {
+        let art = this.sources
+          .reduce((acc, item) => acc.concat(item.source.articles), acc)
+          .filter(item => item.readLater === true);
         return art;
       } else {
         let art = this.sources.reduce(

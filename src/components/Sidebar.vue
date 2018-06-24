@@ -10,10 +10,10 @@
           <li class="nav-item">
               <a class="nav-link" href="">Latest articles</a>
           </li>
-          <li class="nav-item">
-              <a class="nav-link" href="">Read later</a>
+          <li class="nav-item" @click.stop.prevent="closeSidebar">
+              <router-link tag="a" class="nav-link" :to="{ name: 'articlesReadLater', params: { readLater:true }}">Read later</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" @click.stop.prevent="closeSidebar">
             <router-link tag="a" class="nav-link" :to="{ name: 'sources'}">Sources <i class="fas fa-cog"></i></router-link>
           </li>
       </ul>

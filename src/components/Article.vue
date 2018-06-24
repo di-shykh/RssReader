@@ -62,7 +62,7 @@ export default {
         o.source.articles.includes(this.article)
       );
       if (source)
-        this.$store.dispatch('userSources/saveCurrentArticle', {
+        this.$store.dispatch('userSources/saveBookmarckedArticles', {
           source: source,
           article_key: this.article_key,
           article: this.article
@@ -75,7 +75,7 @@ export default {
       o.source.articles.includes(this.article)
     );
     if (source)
-      this.$store.dispatch('userSources/saveCurrentArticle', {
+      this.$store.dispatch('userSources/saveReadArticle', {
         source: source,
         article_key: this.article_key,
         article: this.article

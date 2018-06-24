@@ -70,22 +70,22 @@ const mutations = {
     state.sources = sources;
   },
   /*saveExistingSource: (state, source) => {
-    +    const db = firebase.database();
-    +    const id = auth.user().uid;
-    +    const userDb = db.ref(id);
-    +    const sourceRef = userDb.child('sources/' + source.key);
-    +    sourceRef.set({
-    +      source: {
-    +        name: source.source.name,
-    +        description: source.source.description,
-    +        img: source.source.img,
-    +        link: source.source.link,
-    +        rssLink: source.source.rssLink,
-    +        category: source.source.category,
-    +        articles: source.source.articles
-    +      }
-    +    });
-    +  } использовать потом для сохранения изменений в источнике. Это не мертвый код,он мне еще нужен:)*/
+        const db = firebase.database();
+        const id = auth.user().uid;
+        const userDb = db.ref(id);
+        const sourceRef = userDb.child('sources/' + source.key);
+        sourceRef.set({
+          source: {
+            name: source.source.name,
+            description: source.source.description,
+            img: source.source.img,
+            link: source.source.link,
+            rssLink: source.source.rssLink,
+           category: source.source.category,
+            articles: source.source.articles
+          }
+       });
+      } 
   saveExistingArticle: (state, art) => {
     const db = firebase.database();
     const id = auth.user().uid;
@@ -103,6 +103,34 @@ const mutations = {
       read: article.read,
       readLater: article.readLater
     });
+  },использовать потом для сохранения изменений в источнике и статье. Это не мертвый код,он мне еще нужен:)*/
+  saveStatusReadLater: (state, art) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const ref = userDb.child(
+      'sources/' +
+        art.source.key +
+        '/source/articles/' +
+        art.article_key +
+        '/readLater'
+    );
+    const article = art.article;
+    ref.set(article.readLater);
+  },
+  saveStatusRead: (state, art) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const ref = userDb.child(
+      'sources/' +
+        art.source.key +
+        '/source/articles/' +
+        art.article_key +
+        '/read'
+    );
+    const article = art.article;
+    ref.set(article.read);
   }
 };
 
@@ -113,8 +141,11 @@ const actions = {
   setUserCategories: ({ commit, state }) => {
     commit('setCategories');
   },
-  saveCurrentArticle: ({ commit, state }, art) => {
-    commit('saveExistingArticle', art);
+  saveBookmarckedArticles: ({ commit, state }, art) => {
+    commit('saveStatusReadLater', art);
+  },
+  saveReadArticle: ({ commit, state }, art) => {
+    commit('saveStatusRead', art);
   }
 };
 

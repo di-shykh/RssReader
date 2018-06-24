@@ -37,6 +37,11 @@ const routes = [
         component: Articles
       },
       {
+        path: 'articles/:readLater',
+        name: 'articlesReadLater',
+        component: Articles
+      },
+      {
         path: 'category/:categoryname',
         name: 'articlesbycategory',
         component: Articles
