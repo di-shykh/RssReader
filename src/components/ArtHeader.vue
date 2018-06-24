@@ -1,6 +1,6 @@
 <template>
   <div class="row header">
-    <div class="col-lg-12">
+    <div class="col-12">
       <div class="input-group">
         <input type="text" class="form-control" placeholder="Search">
         <span class="input-group-btn">

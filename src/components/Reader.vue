@@ -2,9 +2,9 @@
   <div class="app-container">
     <app-header class="app-header"></app-header>
     <div class="wrapper">
-      <app-sidebar id="app-sidebar" class="float-left"></app-sidebar>
-        <div @click="closeSidebar">
-          <router-view id="app-content" class="offset-md-3"></router-view>
+      <app-sidebar id="app-sidebar"></app-sidebar>
+        <div @click="closeSidebar" id="app-content">
+          <router-view @click="closeSidebar"></router-view>
         </div>
     </div>
   </div>
@@ -67,23 +67,25 @@ p {
 pre {
   text-align: left;
 }
-.app-header {
-  z-index: 0;
-  flex: 0 62px;
+.app-container {
+  height: 100%;
+}
+.wrapper {
   display: flex;
+  height: calc(100% - 62px);
 }
 #app-sidebar {
   flex: 0 0 auto;
   order: 0;
   flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
 }
 #app-content {
   flex: 1 1 auto;
+  height: 100%;
+  width: 100%;
   order: 1;
-  overflow: auto;
-}
-.wrapper {
-  flex: 1;
-  display: flex;
+  overflow-y: auto;
 }
 </style>

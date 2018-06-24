@@ -12,16 +12,11 @@ export default {
 
 <style>
 html,
-body {
-  margin: 0;
+body,
+#app {
   height: 100%;
-  min-height: 100%;
 }
 body {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
 }
 </style>
