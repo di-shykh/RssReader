@@ -30,13 +30,20 @@ const mutations = {
         const title = findItemValue('//channel/title');
         const url = findItemValue('//channel/link');
         const text = findItemValue('//channel/description');
-        const date = findItemValue('//channel/pubDate')
-          ? findItemValue('//channel/pubDate')
-          : findItemValue('//channel/lastBuildDate');
         let img = '';
-        if (findItemValue('//channel/image/url'))
+        if (
+          xmlDoc
+            .evaluate(
+              '//channel/image/url',
+              xmlDoc,
+              null,
+              XPathResult.ANY_TYPE,
+              null
+            )
+            .iterateNext()
+        ) {
           img = findItemValue('//channel/image/url');
-
+        }
         const articles = [];
         const nodesSnapshot = xmlDoc.evaluate(
           '//channel/item',
@@ -75,7 +82,6 @@ const mutations = {
             media: 'http://search.yahoo.com/mrss/',
             ynews: 'http://news.yahoo.com/rss/'
           };
-
           return function(prefix) {
             return prefixMap[prefix] || null;
           };

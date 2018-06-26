@@ -12,8 +12,8 @@
       <table class="table table-bordered table-hover">
         <thead>
           <tr>
-            <th scope="col"><input type="checkbox" id="selectAll" v-on:change="alert('checked')"> <label for="selectAll"> Select All</label></th>
-            <th scope="col"><button class="btn btn-light"><i class="fas fa-pencil-alt"></i> Rename</button>
+            <th scope="col"><input type="checkbox" id="selectAll" @change="checkAll()" v-model="checked"> <label for="selectAll"> Select All</label></th>
+            <th scope="col"><button class="btn btn-light" v-if="flag" @click="rename()"><i class="fas fa-pencil-alt"></i> Rename</button>
             <button class="btn btn-light">Change Category</button>
             <button class="btn btn-light"><i class="fas fa-trash"></i> Unfollow</button>
             </th>
@@ -21,7 +21,7 @@
         </thead>
         <tbody>
           <tr v-for="source in shownSources">
-            <th scope="row"><input type="checkbox" :id="source" name="checkbox"><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
+            <th scope="row"><input type="checkbox" :value="source" v-model="checkedSources"><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
             <td><label for="source">{{source}}</label></td><!--посмотреть почему не работает чекбокс по клику на ячейке-->
           </tr>
         </tbody>
@@ -34,7 +34,10 @@ export default {
   data() {
     return {
       selectedCategory: '',
-      shownSources: []
+      shownSources: [],
+      checkedSources: [],
+      checked: false,
+      flag: true
     };
   },
   computed: {
@@ -45,11 +48,33 @@ export default {
       return this.$store.getters['userSources/categories'];
     }
   },
+  watch: {
+    checkedSources() {
+      if (this.checkedSources.length > 1) {
+        this.flag = false;
+      } else this.flag = true;
+    }
+  },
   methods: {
     countNumOfSources() {
       return this.sources.length;
     },
+    checkAll() {
+      const checkboxes = document.querySelectorAll(
+        'tbody input[type=checkbox]'
+      );
+      if (this.checked) {
+        for (let i = 0; i < checkboxes.length; i++) {
+          checkboxes[i].checked = true;
+        }
+      } else
+        for (let i = 0; i < checkboxes.length; i++) {
+          checkboxes[i].checked = false;
+        }
+    },
     showSourcesInCategory() {
+      this.checked = false;
+      this.checkAll();
       if (this.selectedCategory === 'All Your Sources') {
         this.shownSources = [];
         this.sources.map(item => {
@@ -58,7 +83,8 @@ export default {
       } else {
         this.shownSources = this.selectedCategory.category.sources;
       }
-    }
+    },
+    rename() {}
   }
 };
 </script>

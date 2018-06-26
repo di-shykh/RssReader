@@ -74,13 +74,14 @@ export default {
   },
   methods: {
     deleteImgTagFromDescr(str) {
-      return str.replace(/<img[^>]*>/gi, '').slice(0, 500) + '...'; //and make description not so long
+      if (str) return str.replace(/<img[^>]*>/gi, '').slice(0, 500) + '...'; //and make description not so long
     },
     getDate(str) {
-      return str
-        .split(' ')
-        .slice(1, 4)
-        .join(' ');
+      if (str)
+        return str
+          .split(' ')
+          .slice(1, 4)
+          .join(' ');
     }
   },
   components: {
