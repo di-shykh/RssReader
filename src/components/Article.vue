@@ -48,13 +48,14 @@ export default {
   },
   methods: {
     deleteImgTagFromDescr(str) {
-      return str.replace(/<img[^>]*>/gi, '');
+      if (str) return str.replace(/<img[^>]*>/gi, '');
     },
     getDate(str) {
-      return str
-        .split(' ')
-        .slice(1, 4)
-        .join(' ');
+      if (str)
+        return str
+          .split(' ')
+          .slice(1, 4)
+          .join(' ');
     },
     markAsReadLater() {
       this.article.readLater = !this.article.readLater;
