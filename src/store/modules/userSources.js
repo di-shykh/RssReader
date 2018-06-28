@@ -131,6 +131,20 @@ const mutations = {
     );
     const article = art.article;
     ref.set(article.read);
+  },
+  changeSourceName: (state, data) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    let ref = userDb.child('sources/' + data.source_key + '/source/name');
+    ref.set(data.newName);
+    ref = userDb.child(
+      'categories/' +
+        data.category_key +
+        '/category/sources/' +
+        data.sourceIdInCategory
+    );
+    ref.set(data.newName);
   }
 };
 
@@ -146,6 +160,9 @@ const actions = {
   },
   saveReadArticle: ({ commit, state }, art) => {
     commit('saveStatusRead', art);
+  },
+  saveNewSourceName: ({ commit, state }, data) => {
+    commit('changeSourceName', data);
   }
 };
 

@@ -12,7 +12,7 @@
       <table class="table table-bordered table-hover">
         <thead>
           <tr>
-            <th scope="col"><input type="checkbox" id="selectAll" @change="checkAll()" v-model="checked"> <label for="selectAll"> Select All</label></th>
+            <th scope="col"><input type="checkbox" id="selectAll" @click="checkAll()" v-model="isCheckAll"> <label for="selectAll"> Select All</label></th>
             <th scope="col"><button class="btn btn-light" v-if="flag" @click="rename()"><i class="fas fa-pencil-alt"></i> Rename</button>
             <button class="btn btn-light">Change Category</button>
             <button class="btn btn-light"><i class="fas fa-trash"></i> Unfollow</button>
@@ -20,9 +20,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="source in shownSources">
-            <th scope="row"><input type="checkbox" :value="source" v-model="checkedSources"><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
-            <td><label for="source">{{source}}</label></td><!--посмотреть почему не работает чекбокс по клику на ячейке-->
+          <tr v-for="(source,key) in shownSources">
+            <th scope="row"><input type="checkbox" :value="source" v-model="checkedSources" @change='updateCheckAll()'><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
+              <td>
+                <div v-if="key===indexOfCheckedSource">
+                  <input type="text" class="form-control" :value="source" id="newNameInput" required >
+                  <button class="btn btn-success" @click="saveNewSourceName()">Save</button>
+                  <button class="btn btn-default" @click.stop.prevent="indexOfCheckedSource=-1">Cancel</button>
+                </div>
+                <label v-else for="source">{{source}}</label>                  
+              </td><!--посмотреть почему не работает чекбокс по клику на ячейке-->
           </tr>
         </tbody>
       </table>
@@ -36,8 +43,10 @@ export default {
       selectedCategory: '',
       shownSources: [],
       checkedSources: [],
-      checked: false,
-      flag: true
+      isCheckAll: false,
+      flag: true,
+      indexOfCheckedSource: -1,
+      newName: ''
     };
   },
   computed: {
@@ -60,21 +69,22 @@ export default {
       return this.sources.length;
     },
     checkAll() {
-      const checkboxes = document.querySelectorAll(
-        'tbody input[type=checkbox]'
-      );
-      if (this.checked) {
-        for (let i = 0; i < checkboxes.length; i++) {
-          checkboxes[i].checked = true;
+      this.isCheckAll = !this.isCheckAll;
+      this.checkedSources = [];
+      if (this.isCheckAll) {
+        for (const key in this.shownSources) {
+          this.checkedSources.push(this.shownSources[key]);
         }
-      } else
-        for (let i = 0; i < checkboxes.length; i++) {
-          checkboxes[i].checked = false;
-        }
+      }
+    },
+    updateCheckAll() {
+      if (this.checkedSources.length === this.shownSources.length)
+        this.isCheckAll = true;
+      else this.isCheckAll = false;
     },
     showSourcesInCategory() {
-      this.checked = false;
-      this.checkAll();
+      this.isCheckAll = false;
+      this.newName = '';
       if (this.selectedCategory === 'All Your Sources') {
         this.shownSources = [];
         this.sources.map(item => {
@@ -84,7 +94,35 @@ export default {
         this.shownSources = this.selectedCategory.category.sources;
       }
     },
-    rename() {}
+    rename() {
+      this.indexOfCheckedSource = this.shownSources.findIndex(
+        el => el === this.checkedSources[0]
+      );
+    },
+    saveNewSourceName() {
+      this.indexOfCheckedSource = -1;
+      //:value="source" conflicts with v-model on the same element because the latter already expands to a value binding internally
+      this.newName = document.querySelector('#newNameInput').value;
+      if (this.newName) {
+        const source = this.sources.find(
+          o => o.source.name === this.checkedSources[0]
+        );
+        const category = this.categories.find(o =>
+          o.category.sources.includes(this.checkedSources[0])
+        );
+        const sourceIdInCategory = category.category.sources.findIndex(
+          el => el === this.checkedSources[0]
+        );
+        this.$store.dispatch('userSources/saveNewSourceName', {
+          source_key: source.key,
+          category_key: category.key,
+          sourceIdInCategory: sourceIdInCategory,
+          newName: this.newName
+        });
+        this.categories = this.$store.getters['userSources/categories'];
+        this.sources = this.$store.getters['userSources/sources'];
+      } else alert('Please, fill the form!');
+    }
   }
 };
 </script>
@@ -93,6 +131,9 @@ h3 {
   color: gray;
 }
 .row {
+  margin-bottom: 10px;
+}
+.form-control {
   margin-bottom: 10px;
 }
 </style>

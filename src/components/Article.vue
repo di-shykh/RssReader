@@ -58,7 +58,7 @@ export default {
           .join(' ');
     },
     markAsReadLater() {
-      this.article.readLater = !this.article.readLater;//
+      this.article.readLater = !this.article.readLater; //
       let source = this.sources.find(o =>
         o.source.articles.includes(this.article)
       );
