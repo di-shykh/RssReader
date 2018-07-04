@@ -7,9 +7,17 @@
   "env": {
     "browser": true
   },
-  "extends": ["prettier", "prettier/standard", "plugin:vue/recommended"],
+  "extends": ["airbnb", "prettier", "prettier/standard", "plugin:vue/recommended"],
   "plugins": ["vue", "prettier"],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": [
+      "error",
+      {
+        "trailingComma": "es5",
+        "singleQuote": true,
+        "printWidth": 100,
+        "semi": true
+      }
+    ]
   }
 }

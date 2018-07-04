@@ -19,4 +19,7 @@ body,
 body {
   margin: 0;
 }
+.material-icons {
+  font-size: 50px !important;
+}
 </style>

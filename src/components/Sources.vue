@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h1 class="row">Organize your sources</h1>
-    <h3 class="row">Following {{countNumOfSources()}} sources</h3>
+    <h3 class="row">Following {{sources.length}} sources</h3>
     <div class="row">
       <select class="form-control" v-model="selectedCategory" v-on:change="showSourcesInCategory()">
         <option selected="selected">All Your Sources</option>
@@ -13,9 +13,9 @@
         <thead>
           <tr>
             <th scope="col"><input type="checkbox" id="selectAll" @click="checkAll()" v-model="isCheckAll"> <label for="selectAll"> Select All</label></th>
-            <th scope="col"><button class="btn btn-light" v-if="flag" @click="rename()"><i class="fas fa-pencil-alt"></i> Rename</button>
+            <th scope="col"><button class="btn btn-light" v-if="flag" @click="rename()"><i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">edit</i> Rename</button>
             <button class="btn btn-light">Change Category</button>
-            <button class="btn btn-light"><i class="fas fa-trash"></i> Unfollow</button>
+            <button class="btn btn-light" @click="unfollow()"><i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">delete</i> Unfollow</button>
             </th>
           </tr>
         </thead>
@@ -24,7 +24,7 @@
             <th scope="row"><input type="checkbox" :value="source" v-model="checkedSources" @change='updateCheckAll()'><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
               <td>
                 <div v-if="key===indexOfCheckedSource">
-                  <input type="text" class="form-control" :value="source" id="newNameInput" required >
+                  <input type="text" class="form-control" :value="source" id="newNameInput" required v-on:keyup.enter="saveNewSourceName()">
                   <button class="btn btn-success" @click="saveNewSourceName()">Save</button>
                   <button class="btn btn-default" @click.stop.prevent="indexOfCheckedSource=-1">Cancel</button>
                 </div>
@@ -119,9 +119,30 @@ export default {
           sourceIdInCategory: sourceIdInCategory,
           newName: this.newName
         });
-        this.categories = this.$store.getters['userSources/categories'];
-        this.sources = this.$store.getters['userSources/sources'];
+        this.checkedSources = [];
       } else alert('Please, fill the form!');
+    },
+    unfollow(){
+      //почему ничего не происходит с элементом с индексом 0?
+      this.checkedSources.forEach(element => {
+        let source = this.sources.find(
+          o => o.source.name === element
+        );
+        let category = this.categories.find(o =>
+          o.category.sources.includes(element)
+        );
+        let sourceIdInCategory = category.category.sources.findIndex(el => el === element
+        );
+        if(source && category && sourceIdInCategory){
+          this.$store.dispatch('userSources/ufollowSource', {
+            source_key: source.key,
+            category_key: category.key,
+            sourceIdInCategory: sourceIdInCategory
+          }); 
+          console.log(element);
+        };
+      });
+      this.checkedSources = []; 
     }
   }
 };

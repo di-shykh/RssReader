@@ -4,8 +4,8 @@
       <div class="col-3 date">{{getDate(article.date)}}</div>
       <h4 class="col-6">{{article.title}}</h4>
       <div class="col-3">
-        <a @click.stop.prevent="markAsReadLater"><i id="icon" v-bind:class="[this.article.readLater ? 'fas' : 'far', 'fa-bookmark', 'fa-2x']" aria-hidden="true"></i></a>
-        <a @click.stop.prevent><i class="fa fa-share-alt fa-2x" aria-hidden="true"></i></a>
+        <a @click.stop.prevent="markAsReadLater"><i class="material-icons">{{bookmarkStyle}}</i></a>
+        <a @click.stop.prevent><i class="material-icons">share</i></a>
       </div>
     </div>
     <div class="row">
@@ -42,8 +42,8 @@ export default {
     readLater() {
       return this.article.readLater;
     },
-    classObj() {
-      return [this.article.readLater ? 'fas' : 'far', 'fa-bookmark', 'fa-2x']; //иконка меняется только после повторного открытия,а не динамически.this.article.readLater и класс меняется динамически. Что я делаю не так?
+    bookmarkStyle() {
+      return this.article.readLater ? 'bookmark' : 'bookmark_border';
     }
   },
   methods: {
@@ -58,7 +58,7 @@ export default {
           .join(' ');
     },
     markAsReadLater() {
-      this.article.readLater = !this.article.readLater; //
+      this.article.readLater = !this.article.readLater; 
       let source = this.sources.find(o =>
         o.source.articles.includes(this.article)
       );

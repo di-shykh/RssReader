@@ -1,13 +1,13 @@
 <template>
   <div class="row header">
     <div class="col-12">
-      <div class="input-group">
+      <div class="input-group">   
         <input type="text" class="form-control" placeholder="Search">
         <span class="input-group-btn">
-            <i class="fas fa-list fa-2x" aria-hidden="true"></i>
+          <i class="material-icons">view_list</i><!--<i class="material-icons">view_module</i>-->
         </span>
         <span class="input-group-btn">
-            <i class="fas fa-sync-alt fa-2x" aria-hidden="true"></i>
+          <i class="material-icons">sync</i>
         </span>
       </div>
     </div>

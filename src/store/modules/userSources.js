@@ -4,12 +4,12 @@ import firebase from 'firebase';
 
 const state = {
   sources: null,
-  categories: null
+  categories: null,
 };
 
 const getters = {
   sources: state => state.sources,
-  categories: state => state.categories
+  categories: state => state.categories,
 };
 
 const mutations = {
@@ -27,8 +27,8 @@ const mutations = {
             key: data.key,
             category: {
               name: data.val().category.name,
-              sources: data.val().category.sources
-            }
+              sources: data.val().category.sources,
+            },
           };
           categories.push(cat);
         });
@@ -58,7 +58,7 @@ const mutations = {
         data.forEach(function(data) {
           let source = {
             key: data.key,
-            source: data.val().source
+            source: data.val().source,
           };
           sources.push(source);
         });
@@ -108,12 +108,9 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
+    //тут кол-во статей увеличивается после отметки прочитать позже
     const ref = userDb.child(
-      'sources/' +
-        art.source.key +
-        '/source/articles/' +
-        art.article_key +
-        '/readLater'
+      'sources/' + art.source.key + '/source/articles/' + art.article_key + '/readLater'
     );
     const article = art.article;
     ref.set(article.readLater);
@@ -122,12 +119,9 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
+    //тут кол-во статей увеличивается после отметки прочитано
     const ref = userDb.child(
-      'sources/' +
-        art.source.key +
-        '/source/articles/' +
-        art.article_key +
-        '/read'
+      'sources/' + art.source.key + '/source/articles/' + art.article_key + '/read'
     );
     const article = art.article;
     ref.set(article.read);
@@ -136,16 +130,37 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
+    //кол-во источников почему-то увеличивается,после переименования.Что я не так делаю?
+    state.sources.find(item => item.key === data.source_key).source.name = data.newName;
+    state.categories.find(item => item.key === data.category_key).category.sources[
+      data.sourceIdInCategory
+    ] =
+      data.newName;
+
     let ref = userDb.child('sources/' + data.source_key + '/source/name');
     ref.set(data.newName);
     ref = userDb.child(
-      'categories/' +
-        data.category_key +
-        '/category/sources/' +
-        data.sourceIdInCategory
+      'categories/' + data.category_key + '/category/sources/' + data.sourceIdInCategory
     );
     ref.set(data.newName);
-  }
+  },
+  deleteSource: (state, data) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    //тут где-то косяк,только не пойму где именно
+    state.sources = state.sources.filter(item => item.key !== data.source_key);
+    state.categories
+      .find(item => item.key === data.category_key)
+      .category.sources.splice(data.sourceIdInCategory, 1);
+    alert('data.sourceIdInCategory:' + data.sourceIdInCategory);
+    /*let ref = userDb.child('sources/' + data.source_key);
+    ref.remove();
+    ref = userDb.child(
+      'categories/' + data.category_key + '/category/sources/' + data.sourceIdInCategory
+    );
+    ref.remove();*/
+  },
 };
 
 const actions = {
@@ -163,7 +178,10 @@ const actions = {
   },
   saveNewSourceName: ({ commit, state }, data) => {
     commit('changeSourceName', data);
-  }
+  },
+  ufollowSource: ({ commit, state }, data) => {
+    commit('deleteSource', data);
+  },
 };
 
 export default {
@@ -171,5 +189,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 };

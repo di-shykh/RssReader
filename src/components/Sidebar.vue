@@ -2,7 +2,7 @@
   <div class=" app-sidebar" @click="openSidebar">
     <div class="sidebar-toggle" v-show="!isSidebarVisible">
         <a>
-          <i class="fa fa-bars fa-2x" aria-hidden="true"></i>
+          <i class="material-icons">menu</i>
         </a>
     </div>
     <nav class="sidebar bg-faded" v-show="isSidebarVisible">
@@ -14,7 +14,7 @@
               <router-link tag="a" class="nav-link" :to="{ name: 'articlesReadLater', params: { readLater:true }}">Read later</router-link>
           </li>
           <li class="nav-item" @click.stop.prevent="closeSidebar">
-            <router-link tag="a" class="nav-link" :to="{ name: 'sources'}">Sources <i class="fas fa-cog"></i></router-link>
+            <router-link tag="a" class="nav-link" :to="{ name: 'sources'}">Sources <i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">settings</i></router-link>
           </li>
       </ul>
         <ul class="nav nav-pills flex-column">

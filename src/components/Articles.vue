@@ -49,26 +49,26 @@ export default {
     articles() {
       if (this.sourceName) {
         let source = this.sources.find(o => o.source.name === this.sourceName);
-        if (source) return source.source.articles;
+        if (source) return this.sortArticlesByDate(source.source.articles);
       }
       let acc = [];
       if (this.categoryName) {
         let art = this.sources
           .filter(item => item.source.category === this.categoryName)
           .reduce((acc, item) => acc.concat(item.source.articles), acc);
-        return art;
+        return this.sortArticlesByDate(art);
       }
       if (this.readLater) {
         let art = this.sources
           .reduce((acc, item) => acc.concat(item.source.articles), acc)
           .filter(item => item.readLater === true);
-        return art;
+        return this.sortArticlesByDate(art);
       } else {
         let art = this.sources.reduce(
           (acc, item) => acc.concat(item.source.articles),
           acc
         );
-        return art;
+        return this.sortArticlesByDate(art);
       }
     }
   },
@@ -82,6 +82,11 @@ export default {
           .split(' ')
           .slice(1, 4)
           .join(' ');
+    },
+    sortArticlesByDate(arr){
+      return arr.sort(function(a, b) {
+          return new Date(b.date) - new Date(a.date);
+        });
     }
   },
   components: {
