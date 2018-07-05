@@ -153,13 +153,28 @@ const mutations = {
     state.categories
       .find(item => item.key === data.category_key)
       .category.sources.splice(data.sourceIdInCategory, 1);
-    alert('data.sourceIdInCategory:' + data.sourceIdInCategory);
-    /*let ref = userDb.child('sources/' + data.source_key);
+    let ref = userDb.child('sources/' + data.source_key);
     ref.remove();
     ref = userDb.child(
       'categories/' + data.category_key + '/category/sources/' + data.sourceIdInCategory
     );
-    ref.remove();*/
+    ref.remove();
+  },
+  changeCategoryOfSource: (state, data) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    console.log(data);
+    state.sources.find(item => item.key === data.source_key).source.category =
+      data.new_category_name;
+    console.log(state.sources.find(item => item.key === data.source_key).source.category);
+    state.categories
+      .find(item => item.key === data.old_category_key)
+      .category.sources.splice(data.sourceIdInCategory, 1);
+    state.categories
+      .find(item => item.key === data.new_category_key)
+      .category.sources.push(data.source_name);
+    console.log(state.categories);
   },
 };
 
@@ -181,6 +196,9 @@ const actions = {
   },
   ufollowSource: ({ commit, state }, data) => {
     commit('deleteSource', data);
+  },
+  changeCategory: ({ commit, state }, data) => {
+    commit('changeCategoryOfSource', data);
   },
 };
 
