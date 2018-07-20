@@ -59,28 +59,50 @@ export default {
     },
     markAsReadLater() {
       this.article.readLater = !this.article.readLater; 
-      let source = this.sources.find(o =>
-        o.source.articles.includes(this.article)
-      );
-      if (source)
+      let source;
+      //почему это дело работает через раз?
+      this.sources.forEach(element => {
+        element.source.articles.forEach(o=>{
+          if(o===this.article){
+            source=element;
+          }
+        })
+      });     
+      /*let source = this.sources.find(o =>
+        o.source.articles.filter(item => typeof item !== 'undefined').includes(this.article)
+      ); и это работает так же*/
+      if(typeof source !== 'undefined'){
+        const article_key = source.source.articles.filter(item => typeof item !== 'undefined').indexOf(this.article);
         this.$store.dispatch('userSources/saveBookmarckedArticles', {
           source: source,
-          article_key: this.article_key,
+          article_key: article_key,
           article: this.article
         });
+      }
     }
   },
   created() {
     this.article.read = true;
-    let source = this.sources.find(o =>
-      o.source.articles.includes(this.article)
-    );
-    if (source)
+    let source;
+    //почему это дело работает через раз?
+    this.sources.forEach(element => {
+      element.source.articles.forEach(o=>{
+        if(o===this.article){
+          source=element;
+        }
+      })
+    });
+     /*let source = this.sources.find(o =>
+        o.source.articles.filter(item => typeof item !== 'undefined').includes(this.article)
+     ); и это работает так же*/
+    if(typeof source !== 'undefined'){
+      const article_key = source.source.articles.filter(item => typeof item !== 'undefined').indexOf(this.article);
       this.$store.dispatch('userSources/saveReadArticle', {
         source: source,
-        article_key: this.article_key,
+        article_key: article_key,
         article: this.article
       });
+    }
   }
 };
 </script>

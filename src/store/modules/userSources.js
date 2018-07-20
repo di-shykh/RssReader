@@ -3,8 +3,8 @@ import auth from '@/auth';
 import firebase from 'firebase';
 
 const state = {
-  sources: null,
-  categories: null,
+  sources: [],
+  categories: [],
 };
 
 const getters = {
@@ -14,7 +14,6 @@ const getters = {
 
 const mutations = {
   setCategories: state => {
-    const categories = [];
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -22,6 +21,7 @@ const mutations = {
     cat.on(
       'value',
       function(data) {
+        const categories = [];
         data.forEach(function(data) {
           let cat = {
             key: data.key,
@@ -32,22 +32,14 @@ const mutations = {
           };
           categories.push(cat);
         });
-        /* categories = data.map(element => ({
-          key: element.key,
-          category: {
-            name: element.val().category.name,
-            sources: element.val().category.sources
-          }
-        }));*/ //I don't know why,but it doesn't work..
+        state.categories = categories;
       },
       function(error) {
         console.log('Error: ' + error.code);
       }
     );
-    state.categories = categories;
   },
   setSources: state => {
-    const sources = [];
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -55,6 +47,7 @@ const mutations = {
     cat.on(
       'value',
       function(data) {
+        const sources = [];
         data.forEach(function(data) {
           let source = {
             key: data.key,
@@ -62,12 +55,12 @@ const mutations = {
           };
           sources.push(source);
         });
+        state.sources = sources;
       },
       function(error) {
         console.log('Error: ' + error.code);
       }
     );
-    state.sources = sources;
   },
   /*saveExistingSource: (state, source) => {
         const db = firebase.database();
@@ -108,7 +101,6 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    //тут кол-во статей увеличивается после отметки прочитать позже
     const ref = userDb.child(
       'sources/' + art.source.key + '/source/articles/' + art.article_key + '/readLater'
     );
@@ -119,7 +111,6 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    //тут кол-во статей увеличивается после отметки прочитано
     const ref = userDb.child(
       'sources/' + art.source.key + '/source/articles/' + art.article_key + '/read'
     );
@@ -130,7 +121,6 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    //кол-во источников почему-то увеличивается,после переименования.Что я не так делаю?
     state.sources.find(item => item.key === data.source_key).source.name = data.newName;
     state.categories.find(item => item.key === data.category_key).category.sources[
       data.sourceIdInCategory
@@ -148,7 +138,6 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    //тут где-то косяк,только не пойму где именно
     state.sources = state.sources.filter(item => item.key !== data.source_key);
     state.categories
       .find(item => item.key === data.category_key)
@@ -164,18 +153,43 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    console.log(data);
     state.sources.find(item => item.key === data.source_key).source.category =
-      data.new_category_name;
-    console.log(state.sources.find(item => item.key === data.source_key).source.category);
+      data.new_category_name; //change name of category in source
+    let ref = userDb.child('sources/' + data.source_key + '/source/category');
+    ref.set(data.new_category_name);
     state.categories
       .find(item => item.key === data.old_category_key)
-      .category.sources.splice(data.sourceIdInCategory, 1);
+      .category.sources.splice(data.sourceIdInOldCategory, 1); //delete source form old category
+    ref = userDb.child(
+      'categories/' + data.old_category_key + '/category/sources/' + data.sourceIdInOldCategory
+    );
+    ref.remove();
     state.categories
       .find(item => item.key === data.new_category_key)
-      .category.sources.push(data.source_name);
-    console.log(state.categories);
+      .category.sources.push(data.source_name); //add source in new category
+    const newSourcesInCategory = state.categories.find(item => item.key === data.new_category_key)
+      .category.sources;
+    ref = userDb.child('categories/' + data.new_category_key + '/category/sources/');
+    ref.set(newSourcesInCategory);
   },
+  createCategory: (state, data) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const sources = [];
+    const category = {
+      name: data,
+      sources: sources,
+    };
+    userDb.child('categories').push({ category });
+  },
+  /*hideOrShowReadedArticles: (state, data) => {
+    if (!data) {
+      state.sources.forEach(item => {
+        item.source.articles = item.source.articles.filter(o => o.read !== true);
+      });
+    } else this.setSources;
+  },*/
 };
 
 const actions = {
@@ -200,6 +214,12 @@ const actions = {
   changeCategory: ({ commit, state }, data) => {
     commit('changeCategoryOfSource', data);
   },
+  createNewCategory: ({ commit, state }, data) => {
+    commit('createCategory', data);
+  },
+  /*hideOrShowReadedArticles: ({ commit, state }, data) => {
+    commit('hideOrShowReadedArticles', data);
+  },*/
 };
 
 export default {

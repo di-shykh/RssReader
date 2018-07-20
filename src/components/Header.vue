@@ -13,12 +13,12 @@
                     <button class="btn btn-default app-menu">Mark all as read</button>
                 </li>
                 <li class="nav-item">
-                    <div class="btn-group app-menu" data-toggle="buttons">
-                        <label class="btn btn-info active">
-                            <input type="radio" name="options" id="option1" autocomplete="off" checked>All
+                    <div class="btn-group app-menu">
+                        <label class="btn btn-info" v-bind:class="{ active: !isActive }" @click="changeActiveClass()">
+                            <input type="radio" name="options" id="option1" value="all" autocomplete="off" checked v-model="checkedOption" v-on:change="showArticles()">All
                         </label>
-                        <label class="btn btn-info">
-                            <input type="radio" name="options" id="option2" autocomplete="off">Unread only
+                        <label class="btn btn-info" v-bind:class="{ active: isActive }" @click="changeActiveClass()">
+                            <input type="radio" name="options" id="option2" value="unread" autocomplete="off" v-model="checkedOption" v-on:change="showArticles()">Unread only
                         </label>
                     </div>                   
                 </li>
@@ -44,7 +44,11 @@
 import auth from '@/auth';
 export default {
   data() {
-    return {};
+    return {
+      checkedOption:'',
+      isActive:false,
+      showAll:true
+    };
   },
   computed: {
     user() {
@@ -54,7 +58,20 @@ export default {
   methods: {
     logOut() {
       auth.logout();
+    },
+    showArticles(){
+      if(this.checkedOption==='all')
+        this.showAll=true;
+      else
+        this.showAll=false;
+      //this.$store.dispatch('userSources/hideOrShowReadedArticles', this.showAll);
+    },
+    changeActiveClass(){
+      this.isActive=!this.isActive;
     }
+  },
+  mounted(){
+    //this.$store.dispatch('userSources/hideOrShowReadedArticles', this.showAll);
   }
 };
 </script>

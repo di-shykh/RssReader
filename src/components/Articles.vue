@@ -51,22 +51,21 @@ export default {
         let source = this.sources.find(o => o.source.name === this.sourceName);
         if (source) return this.sortArticlesByDate(source.source.articles);
       }
-      let acc = [];
       if (this.categoryName) {
         let art = this.sources
           .filter(item => item.source.category === this.categoryName)
-          .reduce((acc, item) => acc.concat(item.source.articles), acc);
+          .reduce((acc, item) => acc.concat(item.source.articles), []);
         return this.sortArticlesByDate(art);
       }
       if (this.readLater) {
         let art = this.sources
-          .reduce((acc, item) => acc.concat(item.source.articles), acc)
+          .reduce((acc, item) => acc.concat(item.source.articles), [])
           .filter(item => item.readLater === true);
         return this.sortArticlesByDate(art);
       } else {
         let art = this.sources.reduce(
           (acc, item) => acc.concat(item.source.articles),
-          acc
+          []
         );
         return this.sortArticlesByDate(art);
       }

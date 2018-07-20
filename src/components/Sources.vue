@@ -24,7 +24,7 @@
               <div v-show="isTexboxVisible" class="form-group form-for-new-category">
                 <label for="catName">Category name</label>
                 <input type="text" id="catName" class="form-control" v-model="newCategoryName">
-                <button class="btn btn-success" disabled @click.stop.prevent="createNewCategory">Create</button>
+                <button class="btn btn-success" disabled @click.stop.prevent="changeCategory($event)">Create</button>
                 <button class="btn btn-light" @click.stop.prevent="isTexboxVisible=false">Cancel</button>
               </div>
           </div>
@@ -53,7 +53,7 @@
 export default {
   data() {
     return {
-      selectedCategory: '',
+      selectedCategory: 'All Your Sources',
       shownSources: [],
       checkedSources: [],
       isCheckAll: false,
@@ -112,11 +112,15 @@ export default {
       if (this.selectedCategory === 'All Your Sources') {
         this.shownSources = [];
         this.sources.map(item => {
-          this.shownSources.push(item.source.name);
+          if(typeof item.source.name!== undefined){
+            this.shownSources.push(item.source.name);
+          }
         });
       } else {
-        this.shownSources = this.selectedCategory.category.sources;
-      }
+        if(this.selectedCategory.category.sources!==undefined)
+          this.shownSources = this.selectedCategory.category.sources.filter((item)=> {
+            return item !== undefined})
+        }
     },
     rename() {
       this.indexOfCheckedSource = this.shownSources.findIndex(
@@ -124,6 +128,7 @@ export default {
       );
     },
     saveNewSourceName() {
+      //после второго изменения значения пропадает выбранная категория и не изменяется значение
       this.indexOfCheckedSource = -1;
       //:value="source" conflicts with v-model on the same element because the latter already expands to a value binding internally
       this.newName = document.querySelector('#newNameInput').value;
@@ -144,6 +149,7 @@ export default {
           newName: this.newName
         });
         this.checkedSources = [];
+        this.showSourcesInCategory();
       } else alert('Please, fill the form!');
     },
     unfollow(){
@@ -164,19 +170,25 @@ export default {
           }); 
         };
       });
-      this.checkedSources = []; 
+      this.checkedSources = [];
+      this.selectedCategory = 'All Your Sources';
+      this.showSourcesInCategory();
     },
     changeCategory(event){
-      this.categoryName=event.target.innerHTML;
-      this.checkedSources.forEach(item=>{
-        let source=this.sources.find(o=>o.source.name===item);
-        let oldCategory=this.categories.find(o =>
+      if(event.target.innerHTML === 'Create'){
+        this.categoryName=this.newCategoryName;
+        this.$store.dispatch('userSources/createNewCategory',this.categoryName);
+      }
+      else    
+        this.categoryName = event.target.innerHTML;
+      this.checkedSources.forEach(item => {
+        let source = this.sources.find(o => o.source.name === item);
+        let oldCategory = this.categories.find(o =>
           o.category.sources.includes(item)
         );
-        let sourceIdInOldCategory = oldCategory.category.sources.findIndex(el => el === item
-        ); 
-        let newCategory=this.categories.find(o =>o.category.name===this.categoryName);
-        console.log('data from sources: '+source.key+' '+oldCategory.key+' '+sourceIdInOldCategory+' '+newCategory.key+' '+this.categoryName+source.source.name);
+        let sourceIdInOldCategory = oldCategory.category.sources.findIndex(el => el === item);    
+        let newCategory = this.categories.find(o => o.category.name === this.categoryName);
+        
         if(source && oldCategory && typeof sourceIdInOldCategory !== 'undefined' && newCategory){
           this.$store.dispatch('userSources/changeCategory', {
             source_key: source.key,
@@ -188,10 +200,12 @@ export default {
           });
         }
       });
+      this.isDropdownVisible = false;
+      this.showSourcesInCategory();
     },
     showMenu(event){
-      if(this.checkedSources.length!==0){
-        this.isDropdownVisible=!this.isDropdownVisible;
+      if(this.checkedSources.length !== 0){
+        this.isDropdownVisible = !this.isDropdownVisible;
         const menu = document.querySelector('div.app-dropdown');
         if (menu) {
           menu.style.left = `${event.screenX}px`;
@@ -200,6 +214,9 @@ export default {
       }
       else alert('You should choose at list one source to change category.');
     }
+  },
+  created(){
+    this.showSourcesInCategory();
   }
 };
 </script>
