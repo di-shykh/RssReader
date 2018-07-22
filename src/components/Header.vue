@@ -14,11 +14,11 @@
                 </li>
                 <li class="nav-item">
                     <div class="btn-group app-menu">
-                        <label class="btn btn-info" v-bind:class="{ active: !isActive }" @click="changeActiveClass()">
-                            <input type="radio" name="options" id="option1" value="all" autocomplete="off" checked v-model="checkedOption" v-on:change="showArticles()">All
+                        <label class="btn btn-info" v-bind:class="{ active: !isActive }">
+                            <input type="radio" name="options" id="option1" value="all" @click="changeActiveClass()" autocomplete="off" v-model="checkedOption" v-on:change="showArticles()">All
                         </label>
-                        <label class="btn btn-info" v-bind:class="{ active: isActive }" @click="changeActiveClass()">
-                            <input type="radio" name="options" id="option2" value="unread" autocomplete="off" v-model="checkedOption" v-on:change="showArticles()">Unread only
+                        <label class="btn btn-info" v-bind:class="{ active: isActive }">
+                            <input type="radio" name="options" id="option2" value="unread"  @click="changeActiveClass()" autocomplete="off" v-model="checkedOption" v-on:change="showArticles()">Unread only
                         </label>
                     </div>                   
                 </li>
@@ -45,7 +45,7 @@ import auth from '@/auth';
 export default {
   data() {
     return {
-      checkedOption:'',
+      checkedOption:'all',
       isActive:false,
       showAll:true
     };
@@ -53,6 +53,16 @@ export default {
   computed: {
     user() {
       return this.$store.getters['user/user'];
+    },
+    flag() {
+      return this.$store.getters['userSources/flag'];
+    }
+  },
+  watch: {
+    flag(newValue, oldValue) {
+      if(newValue !== oldValue){
+        this.showArticles();
+      }
     }
   },
   methods: {
@@ -60,18 +70,14 @@ export default {
       auth.logout();
     },
     showArticles(){
-      if(this.checkedOption==='all')
-        this.showAll=true;
+      if(this.checkedOption === 'all')
+        this.$store.dispatch('userSources/setUserSources');
       else
-        this.showAll=false;
-      //this.$store.dispatch('userSources/hideOrShowReadedArticles', this.showAll);
+        this.$store.dispatch('userSources/hideOrShowReadedArticles');
     },
     changeActiveClass(){
-      this.isActive=!this.isActive;
+      this.isActive = !this.isActive;
     }
-  },
-  mounted(){
-    //this.$store.dispatch('userSources/hideOrShowReadedArticles', this.showAll);
   }
 };
 </script>

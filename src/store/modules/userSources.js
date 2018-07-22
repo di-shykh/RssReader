@@ -5,11 +5,13 @@ import firebase from 'firebase';
 const state = {
   sources: [],
   categories: [],
+  flag: 0,
 };
 
 const getters = {
   sources: state => state.sources,
   categories: state => state.categories,
+  flag: state => state.flag,
 };
 
 const mutations = {
@@ -98,24 +100,46 @@ const mutations = {
     });
   },использовать потом для сохранения изменений в источнике и статье. Это не мертвый код,он мне еще нужен:)*/
   saveStatusReadLater: (state, art) => {
+    const article = art.article;
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const ref = userDb.child(
-      'sources/' + art.source.key + '/source/articles/' + art.article_key + '/readLater'
+    let article_key;
+    let ref = userDb
+      .child('sources/' + art.source.key + '/source/articles/')
+      .orderByChild('link')
+      .equalTo(article.link)
+      .on('value', function(snapshot) {
+        //console.log(snapshot.val());
+        snapshot.forEach(function(data) {
+          article_key = data.key;
+        });
+      });
+    ref = userDb.child(
+      'sources/' + art.source.key + '/source/articles/' + article_key + '/readLater'
     );
-    const article = art.article;
+
     ref.set(article.readLater);
   },
   saveStatusRead: (state, art) => {
+    const article = art.article;
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const ref = userDb.child(
-      'sources/' + art.source.key + '/source/articles/' + art.article_key + '/read'
-    );
-    const article = art.article;
+    let article_key;
+    let ref = userDb
+      .child('sources/' + art.source.key + '/source/articles/')
+      .orderByChild('link')
+      .equalTo(article.link)
+      .on('value', function(snapshot) {
+        //console.log(snapshot.val());
+        snapshot.forEach(function(data) {
+          article_key = data.key;
+        });
+      });
+    ref = userDb.child('sources/' + art.source.key + '/source/articles/' + article_key + '/read');
     ref.set(article.read);
+    state.flag++;
   },
   changeSourceName: (state, data) => {
     const db = firebase.database();
@@ -183,13 +207,11 @@ const mutations = {
     };
     userDb.child('categories').push({ category });
   },
-  /*hideOrShowReadedArticles: (state, data) => {
-    if (!data) {
-      state.sources.forEach(item => {
-        item.source.articles = item.source.articles.filter(o => o.read !== true);
-      });
-    } else this.setSources;
-  },*/
+  hideOrShowReadedArticles: state => {
+    state.sources.forEach(item => {
+      item.source.articles = item.source.articles.filter(o => o.read !== true);
+    });
+  },
 };
 
 const actions = {
@@ -217,9 +239,9 @@ const actions = {
   createNewCategory: ({ commit, state }, data) => {
     commit('createCategory', data);
   },
-  /*hideOrShowReadedArticles: ({ commit, state }, data) => {
-    commit('hideOrShowReadedArticles', data);
-  },*/
+  hideOrShowReadedArticles: ({ commit, state }) => {
+    commit('hideOrShowReadedArticles');
+  },
 };
 
 export default {

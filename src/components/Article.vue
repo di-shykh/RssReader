@@ -59,47 +59,34 @@ export default {
     },
     markAsReadLater() {
       this.article.readLater = !this.article.readLater; 
-      let source;
-      //почему это дело работает через раз?
-      this.sources.forEach(element => {
-        element.source.articles.forEach(o=>{
-          if(o===this.article){
-            source=element;
-          }
-        })
-      });     
-      /*let source = this.sources.find(o =>
-        o.source.articles.filter(item => typeof item !== 'undefined').includes(this.article)
-      ); и это работает так же*/
-      if(typeof source !== 'undefined'){
-        const article_key = source.source.articles.filter(item => typeof item !== 'undefined').indexOf(this.article);
+      const data = this.findDataForChangingStatusOfArticle();
+      if(typeof data.source !== 'undefined'){
         this.$store.dispatch('userSources/saveBookmarckedArticles', {
-          source: source,
-          article_key: article_key,
+          source: data.source,
           article: this.article
         });
+      }
+    },
+    findDataForChangingStatusOfArticle(){
+      let source;
+      this.sources.forEach(element => {
+        element.source.articles.forEach((o,index) => {
+          if(o.link === this.article.link){
+            source = element;
+          }
+        })
+      });
+      return {
+        source
       }
     }
   },
   created() {
     this.article.read = true;
-    let source;
-    //почему это дело работает через раз?
-    this.sources.forEach(element => {
-      element.source.articles.forEach(o=>{
-        if(o===this.article){
-          source=element;
-        }
-      })
-    });
-     /*let source = this.sources.find(o =>
-        o.source.articles.filter(item => typeof item !== 'undefined').includes(this.article)
-     ); и это работает так же*/
-    if(typeof source !== 'undefined'){
-      const article_key = source.source.articles.filter(item => typeof item !== 'undefined').indexOf(this.article);
+    const data = this.findDataForChangingStatusOfArticle();
+    if(typeof data.source !== 'undefined'){
       this.$store.dispatch('userSources/saveReadArticle', {
-        source: source,
-        article_key: article_key,
+        source: data.source,
         article: this.article
       });
     }

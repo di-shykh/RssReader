@@ -5,9 +5,17 @@
     "parser": "babel-eslint"
   },
   "env": {
-    "browser": true
+    "browser": true,
+    "es6": true,
+    "node": true
   },
-  "extends": ["airbnb", "prettier", "prettier/standard", "plugin:vue/recommended"],
+  "extends": [
+    "airbnb-base",
+    "prettier",
+    "plugin:vue/essential",
+    "plugin:prettier/recommended",
+    "eslint:recommended"
+  ],
   "plugins": ["vue", "prettier"],
   "rules": {
     "prettier/prettier": [
