@@ -6,12 +6,14 @@ const state = {
   sources: [],
   categories: [],
   flag: 0,
+  viewList: true,
 };
 
 const getters = {
   sources: state => state.sources,
   categories: state => state.categories,
   flag: state => state.flag,
+  viewList: state => state.viewList,
 };
 
 const mutations = {
@@ -212,6 +214,9 @@ const mutations = {
       item.source.articles = item.source.articles.filter(o => o.read !== true);
     });
   },
+  changeViewOfArticles: state => {
+    state.viewList = !state.viewList;
+  },
 };
 
 const actions = {
@@ -241,6 +246,9 @@ const actions = {
   },
   hideOrShowReadedArticles: ({ commit, state }) => {
     commit('hideOrShowReadedArticles');
+  },
+  changeViewOfArticles: ({ commit, state }) => {
+    commit('changeViewOfArticles');
   },
 };
 

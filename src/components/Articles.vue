@@ -10,13 +10,13 @@
     <div class="row article" v-for="(article,key) in articles">
       <router-link :to="{ name: 'article', params: { article: article, article_key:key }}" tag="div" @click.stop.prevent>
         <div class="date">{{getDate(article.date)}}</div>
-        <div class="w-100"></div>
-        <div class="col-2">
+        <div class="w-100" v-show="viewList"></div>
+        <div class="col-2" v-show="viewList">
           <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
         </div>
         <div class="col-10">
-          <h6>{{article.title}}</h6> 
-          <p v-html="deleteImgTagFromDescr(article.description)"></p>
+          <h5>{{article.title}}</h5> 
+          <p v-html="deleteImgTagFromDescr(article.description)" v-show="viewList"></p>
         </div>
       </router-link>
     </div>
@@ -40,6 +40,9 @@ export default {
     }
   },
   computed: {
+    viewList(){
+      return this.$store.getters['userSources/viewList'];
+    },
     sources() {
       return this.$store.getters['userSources/sources'];
     },
