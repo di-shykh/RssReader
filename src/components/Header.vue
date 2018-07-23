@@ -10,7 +10,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">                   
-                    <button class="btn btn-default app-menu">Mark all as read</button>
+                    <button class="btn btn-default app-menu" @click="markAllAsRead()">Mark all as read</button>
                 </li>
                 <li class="nav-item">
                     <div class="btn-group app-menu">
@@ -56,6 +56,9 @@ export default {
     },
     flag() {
       return this.$store.getters['userSources/flag'];
+    },
+    sources() {
+      return this.$store.getters['userSources/sources'];
     }
   },
   watch: {
@@ -77,6 +80,17 @@ export default {
     },
     changeActiveClass(){
       this.isActive = !this.isActive;
+    },
+    markAllAsRead(){
+      this.sources.forEach(element => {
+        element.source.articles.forEach(o => {
+          o.read = true;
+          this.$store.dispatch('userSources/saveReadArticle', {
+            source: element,
+            article: o
+          });
+        })
+      });
     }
   }
 };

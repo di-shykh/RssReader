@@ -70,7 +70,7 @@ export default {
     findDataForChangingStatusOfArticle(){
       let source;
       this.sources.forEach(element => {
-        element.source.articles.forEach((o,index) => {
+        element.source.articles.forEach(o => {
           if(o.link === this.article.link){
             source = element;
           }
