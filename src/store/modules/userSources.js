@@ -111,7 +111,7 @@ const mutations = {
       .child('sources/' + art.source.key + '/source/articles/')
       .orderByChild('link')
       .equalTo(article.link)
-      .on('value', function(snapshot) {
+      .once('value', function(snapshot) {
         //console.log(snapshot.val());
         snapshot.forEach(function(data) {
           article_key = data.key;
@@ -133,7 +133,7 @@ const mutations = {
       .child('sources/' + art.source.key + '/source/articles/')
       .orderByChild('link')
       .equalTo(article.link)
-      .on('value', function(snapshot) {
+      .once('value', function(snapshot) {
         //console.log(snapshot.val());
         snapshot.forEach(function(data) {
           article_key = data.key;
@@ -217,6 +217,109 @@ const mutations = {
   changeViewOfArticles: state => {
     state.viewList = !state.viewList;
   },
+  updateSources: state => {
+    state.sources.forEach(item => {
+      const db = firebase.database();
+      const id = auth.user().uid;
+      const userDb = db.ref(id);
+
+      try {
+        const xmlhttp = new XMLHttpRequest();
+        xmlhttp.open('GET', item.source.rssLink, false);
+        xmlhttp.send();
+        const xmlDoc = xmlhttp.responseXML;
+        const articles = [];
+        const nodesSnapshot = xmlDoc.evaluate(
+          '//channel/item',
+          xmlDoc,
+          null,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        );
+        for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+          const article = {
+            title: '',
+            link: '',
+            description: '',
+            date: '',
+            img: '',
+            read: false,
+            readLater: false,
+          };
+          article.title = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('title')[0].textContent;
+          article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
+          article.description = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('description')[0].textContent;
+          article.date = nodesSnapshot
+            .snapshotItem(i)
+            .getElementsByTagName('pubDate')[0].textContent;
+          articles.push(article);
+        }
+        var namespaceResolver = (function() {
+          var prefixMap = {
+            media: 'http://search.yahoo.com/mrss/',
+            ynews: 'http://news.yahoo.com/rss/',
+          };
+          return function(prefix) {
+            return prefixMap[prefix] || null;
+          };
+        })();
+        const articlesImg = xmlDoc.evaluate(
+          '//channel/item/media:thumbnail/@url',
+          xmlDoc,
+          namespaceResolver,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        )
+          ? xmlDoc.evaluate(
+              '//channel/item/media:thumbnail/@url',
+              xmlDoc,
+              namespaceResolver,
+              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+              null
+            )
+          : xmlDoc.evaluate(
+              '//channel/item/media:content/@url',
+              xmlDoc,
+              namespaceResolver,
+              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+              null
+            );
+
+        for (let i = 0; i < articlesImg.snapshotLength; i++) {
+          articles[i].img = articlesImg.snapshotItem(i).textContent;
+        }
+
+        articles.forEach(o => {
+          let flag = false;
+          let ref = userDb
+            .child('sources/' + item.key + '/source/articles/')
+            .orderByChild('link')
+            .equalTo(o.link);
+          ref.once('value', function(snapshot) {
+            if (snapshot.val()) flag = true;
+          });
+          ref = userDb.child('sources/' + item.key + '/source/articles/').limitToLast(1);
+          let article_key;
+          ref.once('value', function(snapshot) {
+            snapshot.forEach(function(data) {
+              article_key = data.key;
+            });
+          });
+          if (!flag) {
+            article_key = parseInt(article_key) + 1;
+            ref = userDb.child('sources/' + item.key + '/source/articles/' + article_key);
+            ref.set(o);
+          }
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  },
 };
 
 const actions = {
@@ -249,6 +352,9 @@ const actions = {
   },
   changeViewOfArticles: ({ commit, state }) => {
     commit('changeViewOfArticles');
+  },
+  updateSources: ({ commit, state }) => {
+    commit('updateSources');
   },
 };
 

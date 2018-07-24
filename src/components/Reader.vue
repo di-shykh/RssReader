@@ -47,6 +47,7 @@ export default {
     this.$store.dispatch('userSources/setUserSources');
     this.$store.dispatch('userSources/setUserCategories');
     this.$router.push('/reader/articles');
+    this.$store.dispatch('userSources/updateSources');
   }
 };
 </script>
