@@ -7,6 +7,7 @@ const state = {
   categories: [],
   flag: 0,
   viewList: true,
+  textForSearch: '',
 };
 
 const getters = {
@@ -14,6 +15,7 @@ const getters = {
   categories: state => state.categories,
   flag: state => state.flag,
   viewList: state => state.viewList,
+  textForSearch: state => state.textForSearch,
 };
 
 const mutations = {
@@ -65,6 +67,9 @@ const mutations = {
         console.log('Error: ' + error.code);
       }
     );
+  },
+  setTextForSearch: (state, text) => {
+    state.textForSearch = text;
   },
   /*saveExistingSource: (state, source) => {
         const db = firebase.database();
@@ -355,6 +360,9 @@ const actions = {
   },
   updateSources: ({ commit, state }) => {
     commit('updateSources');
+  },
+  findArticle: ({ commit, state }, text) => {
+    commit('setTextForSearch', text);
   },
 };
 
