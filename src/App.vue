@@ -22,4 +22,7 @@ body {
 .material-icons {
   font-size: 50px !important;
 }
+.highlight {
+  background-color: orange;
+}
 </style>
