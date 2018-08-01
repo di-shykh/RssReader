@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row header">
       <div class="col-3 date">{{getDate(article.date)}}</div>
-      <h4 class="col-6">{{article.title}}</h4>
+      <h4 class="col-6" v-html="article.title"></h4>
       <div class="col-3">
         <a @click.stop.prevent="markAsReadLater"><i class="material-icons">{{bookmarkStyle}}</i></a>
         <a @click.stop.prevent><i class="material-icons">share</i></a>
