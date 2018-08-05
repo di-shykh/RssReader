@@ -30,6 +30,7 @@ export default {
       sourceName: this.$route.params.sourcename,
       categoryName: this.$route.params.categoryname,
       readLater: this.$route.params.readLater,
+      latestArticles: this.$route.params.latestArticles,
       isArticlesFiltered:false,
     };
   },
@@ -38,6 +39,7 @@ export default {
       this.sourceName = to.params.sourcename;
       this.categoryName = to.params.categoryname;
       this.readLater = to.params.readLater;
+      this.latestArticles = to.params.latestArticles;
     },
     textForSearch(newValue, oldValue){
       if(this.textForSearch.trim().length !== 0)
@@ -60,6 +62,8 @@ export default {
       return this.$store.getters['userSources/textForSearch'];
     },
     articles(){
+      let dateForLatestArt=new Date();
+      dateForLatestArt.setDate(dateForLatestArt.getDate() - 1);
         if (this.sourceName) {
           let source = this.sources.find(o => o.source.name === this.sourceName);
           if (source) {
@@ -98,11 +102,20 @@ export default {
             this.deleteTagSpan(art);
             return this.sortArticlesByDate(art);
           }
-        } else {
+        } 
+
+        else {
           let art = this.sources.reduce(
             (acc, item) => acc.concat(item.source.articles),
             []
           );
+          if(this.latestArticles === 'latest'){
+           art = this.sources.reduce(
+            (acc, item) => acc.concat(item.source.articles),
+            []
+           ).filter(item => new Date(item.date) >= dateForLatestArt);
+           this.sourceName='Latest Articles'
+          }
           if(this.isArticlesFiltered){
             return this.filterArticles(art, this.textForSearch);
             this.isArticlesFiltered=false;
@@ -196,6 +209,9 @@ export default {
 .date {
   margin: 15px;
   color: gray;
+}
+.highlight {
+  background-color: orange;
 }
 </style>
 

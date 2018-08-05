@@ -3,9 +3,9 @@
     <h1 class="row">Organize your sources</h1>
     <h3 class="row">Following {{sources.length}} sources</h3>
     <div class="row">
-      <select class="form-control" v-model="selectedCategory" v-on:change="showSourcesInCategory()">
-        <option selected="selected">All Your Sources</option>
-        <option v-for="category in categories" v-bind:value="category">{{category.category.name}}</option>
+      <select class="form-control" :required="true" v-model="selectedCategory" v-on:change="showSourcesInCategory()">
+        <option>All Your Sources</option>
+        <option v-for="category in categories" :value="category.category.name">{{category.category.name}}</option>
       </select>
     </div>
     <div class="row">
@@ -23,7 +23,7 @@
               <a class="dropdown-item app-link" @click="isTexboxVisible=true">+ Create new category</a>
               <div v-show="isTexboxVisible" class="form-group form-for-new-category">
                 <label for="catName">Category name</label>
-                <input type="text" id="catName" class="form-control" v-model="newCategoryName">
+                <input type="text" id="catName" class="form-control" v-model.trim="newCategoryName" v-on:keyup.enter="changeCategory($event)">
                 <button class="btn btn-success" disabled @click.stop.prevent="changeCategory($event)">Create</button>
                 <button class="btn btn-light" @click.stop.prevent="isTexboxVisible=false">Cancel</button>
               </div>
@@ -32,7 +32,7 @@
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody @click="hideDropdown()">
           <tr v-for="(source,key) in shownSources">
             <th scope="row"><input type="checkbox" :value="source" v-model="checkedSources" @change='updateCheckAll()'><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
               <td>
@@ -92,6 +92,10 @@ export default {
     countNumOfSources() {
       return this.sources.length;
     },
+    hideDropdown(){
+      if(this.isDropdownVisible)
+        this.isDropdownVisible=false;
+    },
     checkAll() {
       this.isCheckAll = !this.isCheckAll;
       this.checkedSources = [];
@@ -117,10 +121,14 @@ export default {
           }
         });
       } else {
-        if(this.selectedCategory.category.sources!==undefined)
-          this.shownSources = this.selectedCategory.category.sources.filter((item)=> {
-            return item !== undefined})
+            this.shownSources = [];
+            this.sources.map(item => {
+            if(item.source.category==this.selectedCategory){
+              this.shownSources.push(item.source.name);
+            }
+          });
         }
+        
     },
     rename() {
       this.indexOfCheckedSource = this.shownSources.findIndex(
@@ -128,7 +136,6 @@ export default {
       );
     },
     saveNewSourceName() {
-      //после второго изменения значения пропадает выбранная категория и не изменяется значение
       this.indexOfCheckedSource = -1;
       //:value="source" conflicts with v-model on the same element because the latter already expands to a value binding internally
       this.newName = document.querySelector('#newNameInput').value;
@@ -136,37 +143,45 @@ export default {
         const source = this.sources.find(
           o => o.source.name === this.checkedSources[0]
         );
-        const category = this.categories.find(o =>
-          o.category.sources.includes(this.checkedSources[0])
-        );
-        const sourceIdInCategory = category.category.sources.findIndex(
-          el => el === this.checkedSources[0]
-        );
-        this.$store.dispatch('userSources/saveNewSourceName', {
+        let category;
+        this.categories.forEach(item =>{
+          if(item.category.sources)
+            item.category.sources.forEach(o=>{
+              if(o===this.checkedSources[0])
+                category=item;
+            })
+        })
+        if(this.newName && source && category)
+         this.$store.dispatch('userSources/saveNewSourceName', {
           source_key: source.key,
           category_key: category.key,
-          sourceIdInCategory: sourceIdInCategory,
-          newName: this.newName
+          source_name: source.source.name,
+          new_name: this.newName
         });
         this.checkedSources = [];
         this.showSourcesInCategory();
-      } else alert('Please, fill the form!');
+      } 
+      else alert('Please, fill the form!');
     },
     unfollow(){
       this.checkedSources.forEach(element => {
         let source = this.sources.find(
           o => o.source.name === element
         );
-        let category = this.categories.find(o =>
-          o.category.sources.includes(element)
-        );
-        let sourceIdInCategory = category.category.sources.findIndex(el => el === element
-        );
-        if(source && category && typeof sourceIdInCategory !== 'undefined'){
+        let category;
+        this.categories.forEach(item =>{
+          if(item.category.sources)
+            item.category.sources.forEach(o=>{
+              if(o===element)
+                category=item;
+            })
+        }
+      );
+        if(source && category ){
           this.$store.dispatch('userSources/ufollowSource', {
             source_key: source.key,
             category_key: category.key,
-            sourceIdInCategory: sourceIdInCategory
+            source_name: source.source.name
           }); 
         };
       });
@@ -176,24 +191,41 @@ export default {
     },
     changeCategory(event){
       if(event.target.innerHTML === 'Create'){
-        this.categoryName=this.newCategoryName;
-        this.$store.dispatch('userSources/createNewCategory',this.categoryName);
+        if(this.newCategoryName.trim().length!==0){
+          this.categoryName=this.newCategoryName;
+          this.$store.dispatch('userSources/createNewCategory',this.categoryName);
+        }
+        else alert('Please, enter category name!');
+      }
+      if(event.target.value){
+        if(event.target.value.trim().length!==0){
+          this.categoryName = event.target.value;
+          this.$store.dispatch('userSources/createNewCategory',this.categoryName);
+        }
+        else alert('Please, enter category name!');
       }
       else    
         this.categoryName = event.target.innerHTML;
       this.checkedSources.forEach(item => {
         let source = this.sources.find(o => o.source.name === item);
-        let oldCategory = this.categories.find(o =>
-          o.category.sources.includes(item)
-        );
-        let sourceIdInOldCategory = oldCategory.category.sources.findIndex(el => el === item);    
-        let newCategory = this.categories.find(o => o.category.name === this.categoryName);
+        let oldCategory;
+        this.categories.forEach(item =>{
+          if(item.category.sources)
+            item.category.sources.forEach(o=>{
+              if(o===source.source.name)
+                oldCategory=item;
+            })
+        });
+        let newCategory;
+        this.categories.forEach(item =>{
+          if(item.category.name===this.categoryName)
+          newCategory=item;
+        });        
         
-        if(source && oldCategory && typeof sourceIdInOldCategory !== 'undefined' && newCategory){
+        if(source && oldCategory && newCategory){
           this.$store.dispatch('userSources/changeCategory', {
             source_key: source.key,
             old_category_key: oldCategory.key,
-            sourceIdInOldCategory: sourceIdInOldCategory,
             new_category_key: newCategory.key,
             new_category_name:this.categoryName,
             source_name:source.source.name
@@ -201,6 +233,8 @@ export default {
         }
       });
       this.isDropdownVisible = false;
+      this.isTexboxVisible=false;
+      this.checkedSources = [];
       this.showSourcesInCategory();
     },
     showMenu(event){

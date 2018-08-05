@@ -8,7 +8,7 @@
     <nav class="sidebar bg-faded" v-show="isSidebarVisible">
         <ul class="nav nav-pills flex-column">
           <li class="nav-item">
-              <a class="nav-link" href="">Latest articles</a>
+              <router-link tag="a" class="nav-link" :to="{ name: 'latestArticles', params: { latestArticles:'latest' }}">Latest articles</router-link>
           </li>
           <li class="nav-item" @click.stop.prevent="closeSidebar">
               <router-link tag="a" class="nav-link" :to="{ name: 'articlesReadLater', params: { readLater:true }}">Read later</router-link>

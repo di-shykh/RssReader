@@ -42,6 +42,11 @@ const routes = [
         component: Articles
       },
       {
+        path: 'articles/:latestArticles',
+        name: 'latestArticles',
+        component: Articles
+      },
+      {
         path: 'category/:categoryname',
         name: 'articlesbycategory',
         component: Articles

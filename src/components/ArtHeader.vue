@@ -2,7 +2,7 @@
   <div class="row header">
     <div class="col-12">
       <div class="input-group">   
-        <input type="text" class="form-control" placeholder="Search" v-model="textForSearch" @keyup.enter="findArticle()">
+        <input type="text" class="form-control" placeholder="Search" v-model.trim="textForSearch" @keyup.enter="findArticle()">
         <span class="input-group-btn" @click="changeViewOfArticles()">
           <i class="material-icons" :title="title">{{view}}</i><!--<i class="material-icons">view_module</i>-->
         </span>
@@ -53,10 +53,9 @@ export default {
     },
     findArticle(){
       if(this.textForSearch.length !== 0){
-        this.textForSearch.trim();
         this.$store.dispatch('userSources/findArticle',this.textForSearch);
       }
-      if(this.textForSearch.trim().length === 0)
+      if(this.textForSearch.length === 0)
        this.$store.dispatch('userSources/findArticle',this.textForSearch);
     }
   }
