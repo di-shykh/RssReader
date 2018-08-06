@@ -1,14 +1,44 @@
 <template>
-  <div class="container">
+  <div class="container" @click="isButtonsShown = false">
     <div class="row header">
       <div class="col-3 date">{{getDate(article.date)}}</div>
       <h4 class="col-6" v-html="article.title"></h4>
       <div class="col-3">
         <a @click.stop.prevent="markAsReadLater"><i class="material-icons">{{bookmarkStyle}}</i></a>
-        <a @click.stop.prevent><i class="material-icons">share</i></a>
+        <a @click.stop.prevent="shareContent()"><i class="material-icons">share</i></a>
+        <div id="share-buttons" v-show="isButtonsShown">
+          <vue-goodshare-facebook 
+            :page_url="article.link" 
+            title_social="Facebook"
+            has_counter
+            has_icon
+            button_design="outline" 
+          ></vue-goodshare-facebook>
+          <vue-goodshare-vkontakte 
+            :page_url="article.link" 
+            title_social="Вконтакте"
+            has_counter
+            has_icon
+            button_design="outline" 
+          ></vue-goodshare-vkontakte>
+          <vue-goodshare-twitter 
+            :page_url="article.link" 
+            title_social="Twitter"
+            has_counter
+            has_icon
+            button_design="outline" 
+          ></vue-goodshare-twitter>
+          <vue-goodshare-googleplus 
+            :page_url="article.link" 
+            title_social="Google+"
+            has_counter
+            has_icon
+            button_design="outline" 
+          ></vue-goodshare-googleplus>
+        </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row" @click="isButtonsShown = false">
       <div class="col-4">
         <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
       </div>
@@ -19,11 +49,17 @@
   </div>
 </template>
 <script>
+import VueGoodshareFacebook from 'vue-goodshare/src/providers/Facebook.vue';
+import VueGoodshareVkontakte from 'vue-goodshare/src/providers/Vkontakte.vue';
+import VueGoodshareTwitter from 'vue-goodshare/src/providers/Twitter.vue';
+import VueGoodshareGoogleplus from 'vue-goodshare/src/providers/Googleplus.vue';
+
 export default {
   data() {
     return {
       article: this.$route.params.article,
-      article_key: this.$route.params.article_key
+      article_key: this.$route.params.article_key,
+      isButtonsShown:false
     };
   },
   watch: {
@@ -67,6 +103,9 @@ export default {
         });
       }
     },
+    shareContent(){
+      this.isButtonsShown = !this.isButtonsShown;
+    },
     findDataForChangingStatusOfArticle(){
       let source;
       this.sources.forEach(element => {
@@ -90,6 +129,12 @@ export default {
         article: this.article
       });
     }
+  },
+  components: {
+    VueGoodshareFacebook,
+    VueGoodshareVkontakte,
+    VueGoodshareTwitter,
+    VueGoodshareGoogleplus
   }
 };
 </script>
@@ -104,6 +149,10 @@ export default {
 }
 a i {
   margin-right: 5px;
+}
+#share-buttons {
+  display: flex;
+  flex-direction: row;
 }
 </style>
 
