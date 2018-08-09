@@ -2,30 +2,30 @@
   <div class=" app-sidebar" @click="openSidebar">
     <div class="sidebar-toggle" v-show="!isSidebarVisible">
         <a>
-          <i class="material-icons">menu</i>
+          <i class="material-icons" v-bind:style="textColor">menu</i>
         </a>
     </div>
     <nav class="sidebar bg-faded" v-show="isSidebarVisible">
         <ul class="nav nav-pills flex-column">
           <li class="nav-item">
-              <router-link tag="a" class="nav-link" :to="{ name: 'latestArticles', params: { latestArticles:'latest' }}">Latest articles</router-link>
+              <router-link tag="a" v-bind:style="sidebarTextColor" class="nav-link" :to="{ name: 'latestArticles', params: { latestArticles:'latest' }}">Latest articles</router-link>
           </li>
           <li class="nav-item" @click.stop.prevent="closeSidebar">
-              <router-link tag="a" class="nav-link" :to="{ name: 'articlesReadLater', params: { readLater:true }}">Read later</router-link>
+              <router-link tag="a" v-bind:style="sidebarTextColor" class="nav-link" :to="{ name: 'articlesReadLater', params: { readLater:true }}">Read later</router-link>
           </li>
           <li class="nav-item" @click.stop.prevent="closeSidebar">
-            <router-link tag="a" class="nav-link" :to="{ name: 'sources'}">Sources <i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">settings</i></router-link>
+            <router-link tag="a" v-bind:style="sidebarTextColor" class="nav-link" :to="{ name: 'sources'}">Sources <i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">settings</i></router-link>
           </li>
       </ul>
         <ul class="nav nav-pills flex-column">
             <li class="nav-item" @click.stop.prevent="closeSidebar">
-              <router-link to="/reader/articles" tag="a">All</router-link>
+              <router-link to="/reader/articles" tag="a" v-bind:style="sidebarTextColor">All</router-link>
           </li>
           <li class="nav-item" v-for="cat in userCategories" @click.stop.prevent="closeSidebar">
-              <router-link tag="a" class="nav-link" :to="{ name: 'articlesbycategory', params: { categoryname: cat.category.name }}">{{cat.category.name}}</router-link>
+              <router-link tag="a" class="nav-link" v-bind:style="sidebarTextColor" :to="{ name: 'articlesbycategory', params: { categoryname: cat.category.name }}">{{cat.category.name}}</router-link>
               <ul>
                   <li class="nav-item" v-for="item in cat.category.sources" @click.stop.prevent="closeSidebar">
-                      <router-link :to="{ name: 'articlesbysourcename', params: { sourcename: item }}" tag="a" >{{item}}</router-link>
+                      <router-link v-bind:style="sidebarTextColor" :to="{ name: 'articlesbysourcename', params: { sourcename: item }}" tag="a" >{{item}}</router-link>
                   </li>
               </ul>
           </li>
@@ -33,7 +33,7 @@
         <ul class="nav nav-pills flex-column">
             <li class="nav-item sidebar-footer">
                 <input id="sidebar-input" class="form-control sidebar-input" type="text" v-show="show" @keyup.enter="addSource">
-                <button class="btn sidebar-button" @click="addSource">+Add</button>
+                <button class="btn sidebar-button" @click="addSource" v-bind:style="sidebarColor">+Add</button>
             </li>
         </ul>   
     </nav>     
@@ -60,6 +60,28 @@ export default {
     },
     isSidebarVisible() {
       return this.$store.getters['appearance/showSidebar'];
+    },
+    textColor(){
+      return {
+        color:this.$store.getters['settings/settings'].textColor
+      }
+    },
+    sidebarColor(){
+      return{
+        backgroundColor:this.$store.getters['settings/settings'].sidebarColor,
+        color:this.$store.getters['settings/settings'].sidebarTextColor
+      }
+    },
+    sidebarTextColor(){
+      return{
+        color:this.$store.getters['settings/settings'].sidebarTextColor
+      }
+    }
+  },
+  watch:{
+    isSidebarVisible(){
+      if(!this.isSidebarVisible)
+        this.show=false
     }
   },
   methods: {

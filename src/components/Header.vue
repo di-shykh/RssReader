@@ -30,7 +30,7 @@
                         <a class="dropdown-item" href="#">{{user.displayName}}<br>
                             {{user.email}}</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Settings</a>
+                        <router-link tag="a" class="dropdown-item" :to="{ name: 'settings'}">Settings</router-link>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" @click="logOut">Log out</a>
                     </div>

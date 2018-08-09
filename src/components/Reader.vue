@@ -2,10 +2,10 @@
   <div class="app-container">
     <app-header class="app-header"></app-header>
     <div class="wrapper">
-      <app-sidebar id="app-sidebar"></app-sidebar>
-        <div @click="closeSidebar" id="app-content">
-          <router-view></router-view>
-        </div>
+      <app-sidebar id="app-sidebar" v-bind:style="sidebarStyle"></app-sidebar>
+      <div @click="closeSidebar" id="app-content" v-bind:style="contentStyle">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>
@@ -29,6 +29,25 @@ export default {
     },
     userCategories() {
       return this.$store.getters['userSources/categories'];
+    },
+    userSettings(){
+       return this.$store.getters['settings/settings'];
+    },
+    contentStyle(){
+      return {
+        fontFamily:this.userSettings.fontFamily,
+        color:this.userSettings.textColor,
+        backgroundColor:this.userSettings.bgColor,
+        fontSize:this.userSettings.fontSize
+      }
+    },
+    sidebarStyle(){
+      return{
+        fontFamily:this.userSettings.fontFamily,
+        color:this.userSettings.sidebarTextColor,
+        backgroundColor:this.userSettings.sidebarColor,
+        fontSize:this.userSettings.fontSize
+      }
     }
   },
   components: {
@@ -46,8 +65,13 @@ export default {
   created() {
     this.$store.dispatch('userSources/setUserSources');
     this.$store.dispatch('userSources/setUserCategories');
-    this.$router.push('/reader/articles');
     this.$store.dispatch('userSources/updateSources');
+    this.$store.dispatch('settings/setUserSettings');
+    this.$router.push('/reader/articles'); 
+   /* const content=document.querySelector('#app-content');
+    content.style.fontFamily=this.userSettings.fontFamily;
+    //const sidebar=document.querySelector
+    console.log(content);*/
   }
 };
 </script>

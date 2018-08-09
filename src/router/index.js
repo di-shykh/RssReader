@@ -9,6 +9,7 @@ import AddSource from '../components/AddSource';
 import Articles from '../components/Articles';
 import Article from '../components/Article';
 import Sources from '../components/Sources';
+import Settings from '../components/Settings';
 
 Vue.use(Router);
 
@@ -60,7 +61,12 @@ const routes = [
         path: 'sources',
         name: 'sources',
         component: Sources
-      }
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        component: Settings
+      },
     ]
   },
 
