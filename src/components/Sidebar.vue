@@ -62,19 +62,32 @@ export default {
       return this.$store.getters['appearance/showSidebar'];
     },
     textColor(){
+      if(this.$store.getters['settings/settings'])
       return {
         color:this.$store.getters['settings/settings'].textColor
       }
+      else return{
+        color:'#007bff'
+      }
     },
     sidebarColor(){
-      return{
+      if(this.$store.getters['settings/settings'])
+      return {
         backgroundColor:this.$store.getters['settings/settings'].sidebarColor,
         color:this.$store.getters['settings/settings'].sidebarTextColor
       }
+      else return{
+        backgroundColor:'#dbe4ee',
+        color:'#007bff'
+      }
     },
     sidebarTextColor(){
+      if(this.$store.getters['settings/settings'])
       return{
         color:this.$store.getters['settings/settings'].sidebarTextColor
+      }
+      else return{
+        color:'#007bff'
       }
     }
   },

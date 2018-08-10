@@ -34,19 +34,33 @@ export default {
        return this.$store.getters['settings/settings'];
     },
     contentStyle(){
-      return {
+      if(this.userSettings)
+      return { 
         fontFamily:this.userSettings.fontFamily,
         color:this.userSettings.textColor,
         backgroundColor:this.userSettings.bgColor,
         fontSize:this.userSettings.fontSize
       }
+      else return{
+        fontFamily:'sans-serif',
+        color:'#000000',
+        backgroundColor:'#ffffff',
+        fontSize:'medium'
+      }
     },
     sidebarStyle(){
+      if(this.userSettings)
       return{
         fontFamily:this.userSettings.fontFamily,
         color:this.userSettings.sidebarTextColor,
         backgroundColor:this.userSettings.sidebarColor,
         fontSize:this.userSettings.fontSize
+      }
+      else return{
+        fontFamily:'sans-serif',
+        color:'#007bff',
+        backgroundColor:'#dbe4ee',
+        fontSize:'medium'
       }
     }
   },
@@ -68,10 +82,9 @@ export default {
     this.$store.dispatch('userSources/updateSources');
     this.$store.dispatch('settings/setUserSettings');
     this.$router.push('/reader/articles'); 
-   /* const content=document.querySelector('#app-content');
-    content.style.fontFamily=this.userSettings.fontFamily;
-    //const sidebar=document.querySelector
-    console.log(content);*/
+  },
+  beforeCreate(){
+    this.$store.dispatch('settings/setUserSettings');
   }
 };
 </script>

@@ -154,7 +154,6 @@ export default {
       this.$store.dispatch('settings/setUserSettings');
     },
     saveSettings(){
-      //передать объект с данными для сохранения
       this.$store.dispatch('settings/saveUserSettings');
     }
   }

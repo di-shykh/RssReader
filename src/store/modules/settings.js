@@ -12,46 +12,37 @@ const getters = {
 
 const mutations = {
   setUserSettings: state => {
-    let flag = false;
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
     const sett = userDb.child('settings');
 
-    sett.once('value', function(snapshot) {
-      if (!snapshot.exists()) {
-        console.log('is not exist'); //это в консоли отображается
-        flag = true;
-        console.log(flag); // в консоли true
-      }
-    });
-    if (flag) {
-      console.log('flag from block');
-      //а этот кусок кода не отрабатывает, и на выходе у меня пустой объект state.settings. Ну как так???
-      const settings = {
-        fontFamily: 'sans-serif',
-        fontSize: 'medium',
-        bgColor: '#ffffff',
-        textColor: '#000000',
-        sidebarColor: '#dbe4ee',
-        sidebarTextColor: '#007bff',
-      };
-      sett.set(settings);
-      state.settings = settings;
-    } else
-      sett.on(
-        'value',
-        function(data) {
+    sett.on(
+      'value',
+      function(data) {
+        if (!data.exists()) {
+          const settings = {
+            fontFamily: 'sans-serif',
+            fontSize: 'medium',
+            bgColor: '#ffffff',
+            textColor: '#000000',
+            sidebarColor: '#dbe4ee',
+            sidebarTextColor: '#007bff',
+          };
+          sett.set(settings);
+          state.settings = settings;
+        } else {
           let settings = {};
           data.forEach(function(data) {
             settings[data.key] = data.val();
           });
           state.settings = settings;
-        },
-        function(error) {
-          console.log('Error: ' + error.code);
         }
-      );
+      },
+      function(error) {
+        console.log('Error: ' + error.code);
+      }
+    );
   },
   setDefaultSettings: state => {
     const db = firebase.database();
@@ -68,7 +59,6 @@ const mutations = {
     };
     sett.set(settings);
     state.settings = settings;
-    //разобраться почему перегружается приложение
   },
   setTextColor: (state, data) => {
     state.settings.textColor = data;
