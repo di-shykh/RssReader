@@ -32,7 +32,7 @@
                         <div class="dropdown-divider"></div>
                         <router-link tag="a" class="dropdown-item" :to="{ name: 'settings'}">Settings</router-link>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" @click="logOut">Log out</a>
+                        <a class="dropdown-item" href="#" @click="logOut()">Log out</a>
                     </div>
                 </li>
             </ul>
@@ -71,6 +71,7 @@ export default {
   methods: {
     logOut() {
       auth.logout();
+      this.$router.go(0);
     },
     showArticles(){
       if(this.checkedOption === 'all')

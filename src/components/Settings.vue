@@ -4,7 +4,7 @@
       <h3>Your settings:</h3>
       <div class="w-100"></div>
     </div>
-    <form>
+    <form v-on:submit.prevent>
       <div class="row col-12">
         <h5>Font Family</h5>
         <div class="w-100"></div>

@@ -58,7 +58,7 @@ const mutations = {
       sidebarTextColor: '#007bff',
     };
     sett.set(settings);
-    state.settings = settings;
+    state.settings = settings;1
   },
   setTextColor: (state, data) => {
     state.settings.textColor = data;
