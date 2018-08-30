@@ -242,7 +242,8 @@ const mutations = {
 
       try {
         const xmlhttp = new XMLHttpRequest();
-        xmlhttp.open('GET', item.source.rssLink, false);
+        URL = 'https://cors-anywhere.herokuapp.com/' + item.source.rssLink;
+        xmlhttp.open('GET', URL, false);
         xmlhttp.send();
         const xmlDoc = xmlhttp.responseXML;
         const articles = [];

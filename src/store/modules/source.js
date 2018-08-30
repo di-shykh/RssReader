@@ -4,28 +4,58 @@ import firebase from 'firebase';
 
 const state = {
   source: null,
-  flag: false
+  flag: false,
 };
 
 const getters = {
-  source: state => state.source
+  source: state => state.source,
 };
 
 const mutations = {
   setSource: (state, source) => {
     state.source = source;
   },
+  findRssInUrl: (state, URL) => {
+    const xmlhttp = new XMLHttpRequest();
+    URL = 'https://cors-anywhere.herokuapp.com/' + URL;
+    xmlhttp.open('GET', URL, false);
+    xmlhttp.send();
+    const response = xmlhttp.responseText;
+    const doc = document.implementation.createHTMLDocument(''); // create a HTML document
+    doc.body.innerHTML = response;
+    let x = new XMLSerializer(),
+      p = new DOMParser(),
+      xml_string,
+      xml_doc;
+    xml_string = x.serializeToString(doc.body); // now we have a valid string
+    xml_doc = p.parseFromString(xml_string, 'application/xml'); // and now it is an XML document
+    console.log(xml_doc);
+
+    const nodesSnapshot = xml_doc.evaluate(
+      '//body/link[@type="application/rss+xml"]/@href',
+      xml_doc,
+      null,
+      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+      null
+    );
+    console.log(nodesSnapshot); //возращает XPathResult {resultType: 7, invalidIteratorState: false, snapshotLength: 0}
+
+    for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+      console.log('hi'); //не выполняется ни разу
+      console.log(nodesSnapshot.snapshotItem(i));
+    }
+  },
   findSource: (state, URL) => {
     try {
       const xmlhttp = new XMLHttpRequest();
+      URL = 'https://cors-anywhere.herokuapp.com/' + URL;
       xmlhttp.open('GET', URL, false);
       xmlhttp.send();
       const xmlDoc = xmlhttp.responseXML;
       if (xmlDoc.evaluate) {
         function findItemValue(xpath) {
-          return xmlDoc
-            .evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null)
-            .iterateNext().childNodes[0].nodeValue;
+          return xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
+            .childNodes[0].nodeValue;
         }
         const title = findItemValue('//channel/title');
         const url = findItemValue('//channel/link');
@@ -33,13 +63,7 @@ const mutations = {
         let img = '';
         if (
           xmlDoc
-            .evaluate(
-              '//channel/image/url',
-              xmlDoc,
-              null,
-              XPathResult.ANY_TYPE,
-              null
-            )
+            .evaluate('//channel/image/url', xmlDoc, null, XPathResult.ANY_TYPE, null)
             .iterateNext()
         ) {
           img = findItemValue('//channel/image/url');
@@ -61,14 +85,12 @@ const mutations = {
             date: '',
             img: '',
             read: false,
-            readLater: false
+            readLater: false,
           };
           article.title = nodesSnapshot
             .snapshotItem(i)
             .getElementsByTagName('title')[0].textContent;
-          article.link = nodesSnapshot
-            .snapshotItem(i)
-            .getElementsByTagName('link')[0].textContent;
+          article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
           article.description = nodesSnapshot
             .snapshotItem(i)
             .getElementsByTagName('description')[0].textContent;
@@ -80,7 +102,7 @@ const mutations = {
         var namespaceResolver = (function() {
           var prefixMap = {
             media: 'http://search.yahoo.com/mrss/',
-            ynews: 'http://news.yahoo.com/rss/'
+            ynews: 'http://news.yahoo.com/rss/',
           };
           return function(prefix) {
             return prefixMap[prefix] || null;
@@ -118,7 +140,7 @@ const mutations = {
           sDescr: text,
           sImg: img,
           rssLink: URL,
-          articles
+          articles,
         };
         state.source = newSource;
       }
@@ -135,7 +157,7 @@ const mutations = {
       state.source.category = {
         key: category.key,
         name: category.name,
-        sources: category.sources
+        sources: category.sources,
       };
     }
   },
@@ -149,7 +171,7 @@ const mutations = {
       img: state.source.sImg,
       link: state.source.sLink,
       rssLink: state.source.rssLink,
-      articles: state.source.articles
+      articles: state.source.articles,
     };
     if (state.flag) {
       source.category = state.source.category;
@@ -158,7 +180,7 @@ const mutations = {
     }
     const category = {
       name: state.source.category,
-      sources: [source.name]
+      sources: [source.name],
     };
     userDb.child('categories').push({ category });
     userDb.child('sources').push({ source });
@@ -174,7 +196,7 @@ const mutations = {
       link: state.source.sLink,
       rssLink: state.source.rssLink,
       category: state.source.category.name,
-      articles: state.source.articles
+      articles: state.source.articles,
     };
     const cat = userDb.child('categories/' + state.source.category.key);
     if (state.source.category.sources.includes(source.name)) {
@@ -183,17 +205,17 @@ const mutations = {
       state.source.category.sources.push(source.name);
       const category = {
         name: state.source.category.name,
-        sources: state.source.category.sources
+        sources: state.source.category.sources,
       };
       cat.set({
         category: {
           name: state.source.category.name,
-          sources: state.source.category.sources
-        }
+          sources: state.source.category.sources,
+        },
       });
       userDb.child('sources').push({ source });
     }
-  }
+  },
 };
 
 const actions = {
@@ -211,7 +233,10 @@ const actions = {
   },
   saveCurrentSourceInExistCategory: ({ commit, state }) => {
     commit('saveSourceInExistCategory');
-  }
+  },
+  findRssInUrl: ({ commit, state }, source) => {
+    commit('findRssInUrl', source);
+  },
 };
 
 export default {
@@ -219,5 +244,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 };

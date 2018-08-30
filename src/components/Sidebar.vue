@@ -34,6 +34,7 @@
             <li class="nav-item sidebar-footer">
                 <input id="sidebar-input" class="form-control sidebar-input" type="text" v-show="show" @keyup.enter="addSource">
                 <button class="btn sidebar-button" @click="addSource" v-bind:style="sidebarColor">+Add</button>
+                <button class="btn sidebar-button" @click="findSource" v-bind:style="sidebarColor">+Find</button>
             </li>
         </ul>   
     </nav>     
@@ -104,6 +105,16 @@ export default {
       if (strSource.trim()) {
         this.$store.dispatch('source/findCurrentSource', strSource);
         this.$router.push('/reader/addsource');
+        document.getElementById('sidebar-input').value = '';
+        this.show = false;
+      }
+    },
+    findSource(){
+      this.show = true;
+      const strSource = document.getElementById('sidebar-input').value;
+      if (strSource.trim()) {
+        this.$store.dispatch('source/findRssInUrl', strSource);
+      //  this.$router.push('/reader/addsource');
         document.getElementById('sidebar-input').value = '';
         this.show = false;
       }
