@@ -34,7 +34,7 @@
             <li class="nav-item sidebar-footer">
                 <input id="sidebar-input" class="form-control sidebar-input" type="text" v-show="show" @keyup.enter="addSource">
                 <button class="btn sidebar-button" @click="addSource" v-bind:style="sidebarColor">+Add</button>
-                <button class="btn sidebar-button" @click="findSource" v-bind:style="sidebarColor">+Find</button>
+                <!--<button class="btn sidebar-button" @click="findSource" v-bind:style="sidebarColor">+Find</button>-->
             </li>
         </ul>   
     </nav>     
@@ -96,20 +96,37 @@ export default {
     isSidebarVisible(){
       if(!this.isSidebarVisible)
         this.show=false
-    }
+    },
+    /*isFeedReady(){
+      if(this.$store.getters['source/source'])
+        this.$router.push('/reader/addsource');
+    }*/
   },
   methods: {
     addSource() {
       this.show = true;
       const strSource = document.getElementById('sidebar-input').value;
       if (strSource.trim()) {
-        this.$store.dispatch('source/findCurrentSource', strSource);
-        this.$router.push('/reader/addsource');
+        try{
+          this.$store.dispatch('source/parseFeed', strSource);
+        }
+        catch (error) {
+          console.error(error);
+        }
+        /*const rssFeeds=this.$store.getters['source/rssFeeds'];
+        if(rssFeeds.length!=0){
+          rssFeeds.forEach(item => {
+            this.$store.dispatch('source/findCurrentSource', item);
+          });
+        }
+        else {
+          this.$store.dispatch('source/findCurrentSource', strSource);
+        }*/
         document.getElementById('sidebar-input').value = '';
         this.show = false;
       }
     },
-    findSource(){
+    /*findSource(){
       this.show = true;
       const strSource = document.getElementById('sidebar-input').value;
       if (strSource.trim()) {
@@ -118,7 +135,7 @@ export default {
         document.getElementById('sidebar-input').value = '';
         this.show = false;
       }
-    },
+    },*/
     openSidebar() {
       this.$store.dispatch('appearance/openWideSidebar');
     },

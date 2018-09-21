@@ -19,38 +19,30 @@ const getters = {
 };
 
 const mutations = {
-  setCategories: state => {
-    const db = firebase.database();
-    const id = auth.user().uid;
-    const userDb = db.ref(id);
-    const cat = userDb.child('categories');
-    cat.on(
-      'value',
-      function(data) {
-        const categories = [];
-        data.forEach(function(data) {
-          let cat = {
-            key: data.key,
-            category: {
-              name: data.val().category.name,
-              sources:
-                typeof data.val().category.sources !== 'undefined'
-                  ? Object.keys(data.val().category.sources).map(
-                      key => data.val().category.sources[key]
-                    )
-                  : data.val().category.sources,
-            },
-          };
-          categories.push(cat);
-        });
-        state.categories = categories;
-      },
-      function(error) {
-        console.log('Error: ' + error.code);
-      }
-    );
+  setCategories: (state, categories) => {
+    state.categories = categories;
   },
-  setSources: state => {
+  setSources: (state, sources) => {
+    state.sources = sources;
+  },
+  setTextForSearch: (state, text) => {
+    state.textForSearch = text;
+  },
+  saveStatusRead: state => {
+    state.flag++;
+  },
+  hideOrShowReadedArticles: state => {
+    state.sources.forEach(item => {
+      item.source.articles = item.source.articles.filter(o => o.read !== true);
+    });
+  },
+  changeViewOfArticles: state => {
+    state.viewList = !state.viewList;
+  },
+};
+
+const actions = {
+  setUserSources: ({ commit, state }) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -65,18 +57,46 @@ const mutations = {
             source: data.val().source,
           };
           sources.push(source);
+          commit('setSources', sources);
         });
-        state.sources = sources;
       },
       function(error) {
         console.log('Error: ' + error.code);
       }
     );
   },
-  setTextForSearch: (state, text) => {
-    state.textForSearch = text;
+  setUserCategories: ({ commit, state }) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    const cat = userDb.child('categories');
+    cat.on(
+      'value',
+      function(data) {
+        const categories = [];
+        data.forEach(function(data) {
+          let cat = {
+            key: data.key,
+            category: {
+              name: data.val().category.name,
+              sources:
+                data.val().category.sources != undefined
+                  ? Object.keys(data.val().category.sources).map(
+                      key => data.val().category.sources[key]
+                    )
+                  : data.val().category.sources,
+            },
+          };
+          categories.push(cat);
+          commit('setCategories', categories);
+        });
+      },
+      function(error) {
+        console.log('Error: ' + error.code);
+      }
+    );
   },
-  saveStatusReadLater: (state, art) => {
+  saveBookmarckedArticles: ({ commit, state }, art) => {
     const article = art.article;
     const db = firebase.database();
     const id = auth.user().uid;
@@ -97,7 +117,7 @@ const mutations = {
 
     ref.set(article.readLater);
   },
-  saveStatusRead: (state, art) => {
+  saveReadArticle: ({ commit, state }, art) => {
     const article = art.article;
     const db = firebase.database();
     const id = auth.user().uid;
@@ -114,9 +134,9 @@ const mutations = {
       });
     ref = userDb.child('sources/' + art.source.key + '/source/articles/' + article_key + '/read');
     ref.set(article.read);
-    state.flag++;
+    commit('saveStatusRead');
   },
-  changeSourceName: (state, data) => {
+  saveNewSourceName: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -138,7 +158,7 @@ const mutations = {
       ref.set(data.new_name);
     }
   },
-  deleteSource: (state, data) => {
+  ufollowSource: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -170,7 +190,7 @@ const mutations = {
       ref.remove();
     }
   },
-  changeCategoryOfSource: (state, data) => {
+  changeCategory: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -215,7 +235,7 @@ const mutations = {
     ref = userDb.child('categories/' + data.new_category_key + '/category/sources/' + source_key);
     ref.set(data.source_name);
   },
-  createCategory: (state, data) => {
+  createNewCategory: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
@@ -226,15 +246,13 @@ const mutations = {
     };
     userDb.child('categories').push({ category });
   },
-  hideOrShowReadedArticles: state => {
-    state.sources.forEach(item => {
-      item.source.articles = item.source.articles.filter(o => o.read !== true);
-    });
+  hideOrShowReadedArticles: ({ commit, state }) => {
+    commit('hideOrShowReadedArticles');
   },
-  changeViewOfArticles: state => {
-    state.viewList = !state.viewList;
+  changeViewOfArticles: ({ commit, state }) => {
+    commit('changeViewOfArticles');
   },
-  updateSources: state => {
+  updateSources: ({ commit, state }) => {
     state.sources.forEach(item => {
       const db = firebase.database();
       const id = auth.user().uid;
@@ -243,136 +261,113 @@ const mutations = {
       try {
         const xmlhttp = new XMLHttpRequest();
         URL = 'https://cors-anywhere.herokuapp.com/' + item.source.rssLink;
-        xmlhttp.open('GET', URL, false);
-        xmlhttp.send();
-        const xmlDoc = xmlhttp.responseXML;
-        const articles = [];
-        const nodesSnapshot = xmlDoc.evaluate(
-          '//channel/item',
-          xmlDoc,
-          null,
-          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-          null
-        );
-        for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-          const article = {
-            title: '',
-            link: '',
-            description: '',
-            date: '',
-            img: '',
-            read: false,
-            readLater: false,
-          };
-          article.title = nodesSnapshot
-            .snapshotItem(i)
-            .getElementsByTagName('title')[0].textContent;
-          article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
-          article.description = nodesSnapshot
-            .snapshotItem(i)
-            .getElementsByTagName('description')[0].textContent;
-          article.date = nodesSnapshot
-            .snapshotItem(i)
-            .getElementsByTagName('pubDate')[0].textContent;
-          articles.push(article);
-        }
-        var namespaceResolver = (function() {
-          var prefixMap = {
-            media: 'http://search.yahoo.com/mrss/',
-            ynews: 'http://news.yahoo.com/rss/',
-          };
-          return function(prefix) {
-            return prefixMap[prefix] || null;
-          };
-        })();
-        const articlesImg = xmlDoc.evaluate(
-          '//channel/item/media:thumbnail/@url',
-          xmlDoc,
-          namespaceResolver,
-          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-          null
-        )
-          ? xmlDoc.evaluate(
-              '//channel/item/media:thumbnail/@url',
-              xmlDoc,
-              namespaceResolver,
-              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-              null
-            )
-          : xmlDoc.evaluate(
-              '//channel/item/media:content/@url',
-              xmlDoc,
-              namespaceResolver,
-              XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-              null
-            );
+        xmlhttp.open('GET', URL, true);
+        xmlhttp.onload = function(e) {
+          if (xmlhttp.readyState === 4) {
+            if (xmlhttp.status === 200) {
+              const xmlDoc = xmlhttp.responseXML;
+              const articles = [];
+              const nodesSnapshot = xmlDoc.evaluate(
+                '//channel/item',
+                xmlDoc,
+                null,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                null
+              );
+              for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+                const article = {
+                  title: '',
+                  link: '',
+                  description: '',
+                  date: '',
+                  img: '',
+                  read: false,
+                  readLater: false,
+                };
+                article.title = nodesSnapshot
+                  .snapshotItem(i)
+                  .getElementsByTagName('title')[0].textContent;
+                article.link = nodesSnapshot
+                  .snapshotItem(i)
+                  .getElementsByTagName('link')[0].textContent;
+                article.description = nodesSnapshot
+                  .snapshotItem(i)
+                  .getElementsByTagName('description')[0].textContent;
+                article.date = nodesSnapshot
+                  .snapshotItem(i)
+                  .getElementsByTagName('pubDate')[0].textContent;
+                articles.push(article);
+              }
+              var namespaceResolver = (function() {
+                var prefixMap = {
+                  media: 'http://search.yahoo.com/mrss/',
+                  ynews: 'http://news.yahoo.com/rss/',
+                };
+                return function(prefix) {
+                  return prefixMap[prefix] || null;
+                };
+              })();
+              const articlesImg = xmlDoc.evaluate(
+                '//channel/item/media:thumbnail/@url',
+                xmlDoc,
+                namespaceResolver,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                null
+              )
+                ? xmlDoc.evaluate(
+                    '//channel/item/media:thumbnail/@url',
+                    xmlDoc,
+                    namespaceResolver,
+                    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                    null
+                  )
+                : xmlDoc.evaluate(
+                    '//channel/item/media:content/@url',
+                    xmlDoc,
+                    namespaceResolver,
+                    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                    null
+                  );
 
-        for (let i = 0; i < articlesImg.snapshotLength; i++) {
-          articles[i].img = articlesImg.snapshotItem(i).textContent;
-        }
+              for (let i = 0; i < articlesImg.snapshotLength; i++) {
+                articles[i].img = articlesImg.snapshotItem(i).textContent;
+              }
 
-        articles.forEach(o => {
-          let flag = false;
-          let ref = userDb
-            .child('sources/' + item.key + '/source/articles/')
-            .orderByChild('link')
-            .equalTo(o.link);
-          ref.once('value', function(snapshot) {
-            if (snapshot.val()) flag = true;
-          });
-          ref = userDb.child('sources/' + item.key + '/source/articles/').limitToLast(1);
-          let article_key;
-          ref.once('value', function(snapshot) {
-            snapshot.forEach(function(data) {
-              article_key = data.key;
-            });
-          });
-          if (!flag) {
-            article_key = parseInt(article_key) + 1;
-            ref = userDb.child('sources/' + item.key + '/source/articles/' + article_key);
-            ref.set(o);
+              articles.forEach(o => {
+                let flag = false;
+                let ref = userDb
+                  .child('sources/' + item.key + '/source/articles/')
+                  .orderByChild('link')
+                  .equalTo(o.link);
+                ref.once('value', function(snapshot) {
+                  if (snapshot.val()) flag = true;
+                });
+                ref = userDb.child('sources/' + item.key + '/source/articles/').limitToLast(1);
+                let article_key;
+                ref.once('value', function(snapshot) {
+                  snapshot.forEach(function(data) {
+                    article_key = data.key;
+                  });
+                });
+                if (!flag) {
+                  article_key = parseInt(article_key) + 1;
+                  ref = userDb.child('sources/' + item.key + '/source/articles/' + article_key);
+                  ref.set(o);
+                }
+              });
+            } else {
+              console.error(xmlhttp.statusText);
+            }
           }
-        });
+        };
+        xmlhttp.onerror = function(e) {
+          console.error(xhr.statusText);
+        };
+        xmlhttp.send(null);
       } catch (error) {
         console.error(error);
       }
     });
-  },
-};
-
-const actions = {
-  setUserSources: ({ commit, state }) => {
-    commit('setSources');
-  },
-  setUserCategories: ({ commit, state }) => {
-    commit('setCategories');
-  },
-  saveBookmarckedArticles: ({ commit, state }, art) => {
-    commit('saveStatusReadLater', art);
-  },
-  saveReadArticle: ({ commit, state }, art) => {
-    commit('saveStatusRead', art);
-  },
-  saveNewSourceName: ({ commit, state }, data) => {
-    commit('changeSourceName', data);
-  },
-  ufollowSource: ({ commit, state }, data) => {
-    commit('deleteSource', data);
-  },
-  changeCategory: ({ commit, state }, data) => {
-    commit('changeCategoryOfSource', data);
-  },
-  createNewCategory: ({ commit, state }, data) => {
-    commit('createCategory', data);
-  },
-  hideOrShowReadedArticles: ({ commit, state }) => {
-    commit('hideOrShowReadedArticles');
-  },
-  changeViewOfArticles: ({ commit, state }) => {
-    commit('changeViewOfArticles');
-  },
-  updateSources: ({ commit, state }) => {
-    commit('updateSources');
   },
   findArticle: ({ commit, state }, text) => {
     commit('setTextForSearch', text);
