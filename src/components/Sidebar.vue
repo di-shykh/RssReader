@@ -90,6 +90,9 @@ export default {
       else return{
         color:'#007bff'
       }
+    },
+    findedSources(){
+      return this.$store.getters['source/source']
     }
   },
   watch:{
@@ -97,45 +100,26 @@ export default {
       if(!this.isSidebarVisible)
         this.show=false
     },
-    /*isFeedReady(){
-      if(this.$store.getters['source/source'])
-        this.$router.push('/reader/addsource');
-    }*/
   },
   methods: {
-    addSource() {
+    async addSource() {
       this.show = true;
       const strSource = document.getElementById('sidebar-input').value;
       if (strSource.trim()) {
         try{
-          this.$store.dispatch('source/parseFeed', strSource);
+          this.$store.dispatch('source/setSourcesAndFeedsToNull');
+          const promise=await this.$store.dispatch('source/parseFeed', strSource);
+          if(this.findedSources){
+            this.$router.push('/reader/addsource');
+          }
         }
         catch (error) {
           console.error(error);
         }
-        /*const rssFeeds=this.$store.getters['source/rssFeeds'];
-        if(rssFeeds.length!=0){
-          rssFeeds.forEach(item => {
-            this.$store.dispatch('source/findCurrentSource', item);
-          });
-        }
-        else {
-          this.$store.dispatch('source/findCurrentSource', strSource);
-        }*/
         document.getElementById('sidebar-input').value = '';
         this.show = false;
       }
     },
-    /*findSource(){
-      this.show = true;
-      const strSource = document.getElementById('sidebar-input').value;
-      if (strSource.trim()) {
-        this.$store.dispatch('source/findRssInUrl', strSource);
-      //  this.$router.push('/reader/addsource');
-        document.getElementById('sidebar-input').value = '';
-        this.show = false;
-      }
-    },*/
     openSidebar() {
       this.$store.dispatch('appearance/openWideSidebar');
     },

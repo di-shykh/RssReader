@@ -23,7 +23,6 @@ const mutations = {
   },
   findSource: (state, source) => {
     state.source.push(source);
-    console.log(source);
   },
   setCategory: (state, category) => {
     if (!category.key) {
@@ -37,6 +36,10 @@ const mutations = {
       };
     }
   },
+  setSourcesAndFeedsToNull: state => {
+    state.source = [];
+    state.rssFeeds = [];
+  },
   /* saveSourceInExistCategory: state => {
 
   },*/
@@ -45,6 +48,9 @@ const mutations = {
 const actions = {
   setCurrentSource: ({ commit, state }, source) => {
     commit('setSource', source);
+  },
+  setSourcesAndFeedsToNull: ({ commit, state }) => {
+    commit('setSourcesAndFeedsToNull');
   },
   findCurrentSource({ commit, state }, URL) {
     return new Promise((resolve, reject) => {
@@ -165,7 +171,6 @@ const actions = {
         xmlhttp.send(null);
       } catch (error) {
         console.error(error);
-        //alert("Unfortunately we can't save this blog");
       }
     });
   },
@@ -270,7 +275,6 @@ const actions = {
       try {
         if (!newSource) {
           const promise = await dispatch('findRssInUrl', URL);
-          console.log(state.rssFeeds);
           for (let i = 0; i < state.rssFeeds.length; i++) {
             let source = await dispatch('findCurrentSource', state.rssFeeds[i]);
             if (source) commit('findSource', source);
