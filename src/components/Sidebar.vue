@@ -37,7 +37,12 @@
                 <!--<button class="btn sidebar-button" @click="findSource" v-bind:style="sidebarColor">+Find</button>-->
             </li>
         </ul>   
-    </nav>     
+    </nav> 
+    <div class="wait" v-show="isRssFeedNotLoaded">
+      <span class="loader">
+        <i class="material-icons" id="sync">sync</i>
+      </span>  
+    </div>     
   </div>
 </template>
 
@@ -49,7 +54,9 @@ export default {
   data() {
     return {
       show: false,
-      someData: ''
+      someData: '',
+      isRssFeedNotLoaded: false,
+      isTimerWorking: true
     };
   },
   computed: {
@@ -108,6 +115,8 @@ export default {
       if (strSource.trim()) {
         try{
           this.$store.dispatch('source/setSourcesAndFeedsToNull');
+          this.isRssFeedNotLoaded=true;
+          this.rotateIcon();
           const promise=await this.$store.dispatch('source/parseFeed', strSource);
           if(this.findedSources){
             this.$router.push('/reader/addsource');
@@ -115,10 +124,26 @@ export default {
         }
         catch (error) {
           console.error(error);
+          this.$router.push('/reader/articles');
         }
-        document.getElementById('sidebar-input').value = '';
-        this.show = false;
+        finally{
+          document.getElementById('sidebar-input').value = '';
+          this.show = false;
+          this.isTimerWorking=false;
+          this.isRssFeedNotLoaded=false;
+        }
       }
+    },
+    rotateIcon(){
+      let degrees=0;
+      let loop=setInterval(function(){
+        const elem=document.querySelector('#sync');
+        elem.style.transform = 'rotate('+degrees+'deg)';
+        degrees+=5;
+        if(this.isTimerWorking){
+          clearInterval(loop);
+        }
+      },3);
     },
     openSidebar() {
       this.$store.dispatch('appearance/openWideSidebar');
@@ -160,6 +185,24 @@ ul {
 }
 .fa-bars {
   margin: 10px;
+}
+.wait {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  display: flex; /* establish flex container */
+  flex-direction: column; /* make main axis vertical */
+  justify-content: center; /* center items vertically, in this case */
+  align-items: center;
+}
+#sync {
+  z-index: 6;
+  color: white;
+  text-align: center; /* will center text in <p>, which is not a flex item */
 }
 </style>
 

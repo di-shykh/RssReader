@@ -40,9 +40,6 @@ const mutations = {
     state.source = [];
     state.rssFeeds = [];
   },
-  /* saveSourceInExistCategory: state => {
-
-  },*/
 };
 
 const actions = {
@@ -149,14 +146,13 @@ const actions = {
                   }
 
                   const newSource = {
-                    sTitle: title,
-                    sLink: url,
-                    sDescr: text,
-                    sImg: img,
+                    name: title,
+                    link: url,
+                    description: text,
+                    img: img,
                     rssLink: URL,
                     articles,
                   };
-                  //commit('findSource', newSource);
                   resolve(newSource);
                 }
               } else {
@@ -174,65 +170,39 @@ const actions = {
       }
     });
   },
-  setCurrentCategory: ({ commit, state }, category) => {
-    commit('setCategory', category);
-  },
-  saveCurrentSource: ({ commit, state }) => {
+  saveCurrentSourceInNewCategory: ({ commit, state }, source) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const source = {
-      name: state.source.sTitle,
-      description: state.source.sDescr,
-      img: state.source.sImg,
-      link: state.source.sLink,
-      rssLink: state.source.rssLink,
-      articles: state.source.articles,
-    };
-    if (state.flag) {
-      source.category = state.source.category;
-    } else {
-      source.category = state.source.category.name;
-    }
+
     const category = {
-      name: state.source.category,
+      name: source.category,
       sources: [source.name],
     };
     userDb.child('categories').push({ category });
     userDb.child('sources').push({ source });
   },
-  saveCurrentSourceInExistCategory: ({ commit, state }) => {
+  saveCurrentSourceInExistCategory: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const source = {
-      name: state.source.sTitle,
-      description: state.source.sDescr,
-      img: state.source.sImg,
-      link: state.source.sLink,
-      rssLink: state.source.rssLink,
-      category: state.source.category.name,
-      articles: state.source.articles,
-    };
-    const cat = userDb.child('categories/' + state.source.category.key);
-    if (state.source.category.sources.includes(source.name)) {
-      alert('This source already exists!');
-    } else {
-      //state.source.category.sources.push(source.name);
-      const category = {
-        name: state.source.category.name,
-        sources: state.source.category.sources,
-      };
-      cat.set({
-        category: {
-          name: state.source.category.name,
-          sources: state.source.category.sources,
-        },
+    const source = data.source;
+    //save source in array of sources in categories and in sources
+    let ref = userDb.child('categories/' + data.category_key + '/category/sources/').limitToLast(1);
+    let source_key;
+    ref.once('value', function(snapshot) {
+      snapshot.forEach(function(data) {
+        source_key = data.key;
       });
-      userDb.child('sources').push({ source });
-    }
-    // commit('saveSourceInExistCategory');
+    });
+    source_key = parseInt(source_key) + 1;
+    if (!source_key) source_key = 0;
+    ref = userDb.child('categories/' + data.category_key + '/category/sources/' + source_key);
+    ref.set(source.name);
+    //add source to sources
+    userDb.child('sources').push({ source });
   },
+
   findRssInUrl({ commit, state }, URL) {
     return new Promise(resolve => {
       try {
