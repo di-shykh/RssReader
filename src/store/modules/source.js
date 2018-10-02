@@ -158,8 +158,8 @@ const actions = {
               } else {
                 reject(console.error(xmlhttp.statusText));
               }
-            }
-          }
+            } else reject(console.error(xmlhttp.statusText));
+          } else reject(console.error(xmlhttp.statusText));
         };
         xmlhttp.onerror = function(e) {
           reject(console.error(xmlhttp.statusText));
@@ -204,7 +204,7 @@ const actions = {
   },
 
   findRssInUrl({ commit, state }, URL) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       try {
         const xmlhttp = new XMLHttpRequest();
         URL = 'https://cors-anywhere.herokuapp.com/' + URL;
@@ -212,25 +212,43 @@ const actions = {
         xmlhttp.responseType = 'document';
         xmlhttp.send();
         xmlhttp.onload = function() {
-          const xml_doc = this.responseXML;
-          const nodesSnapshot = xml_doc.evaluate(
-            '//link[@type="application/rss+xml"]/@href',
-            xml_doc,
-            null,
-            XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-            null
-          );
-          let rssFeeds = [];
-          for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-            rssFeeds.push(nodesSnapshot.snapshotItem(i).textContent);
-          }
-          resolve(commit('findRssInUrl', rssFeeds));
+          if (xmlhttp.readyState === 4) {
+            if (xmlhttp.status === 200) {
+              const xml_doc = this.responseXML;
+              const nodesSnapshot = xml_doc.evaluate(
+                '//link[@type="application/rss+xml"]/@href',
+                xml_doc,
+                null,
+                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                null
+              );
+              let rssFeeds = [];
+              for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+                rssFeeds.push(nodesSnapshot.snapshotItem(i).textContent);
+              }
+              resolve(commit('findRssInUrl', rssFeeds));
+            } else
+              reject(() => {
+                console.error(xmlhttp.statusText);
+                alert("Unfortunately we can't save this blog");
+              });
+          } else
+            reject(() => {
+              console.error(xmlhttp.statusText);
+              alert("Unfortunately we can't save this blog");
+            });
         };
         xmlhttp.onerror = function(e) {
-          reject(console.error(xmlhttp.statusText));
+          reject(() => {
+            console.error(xmlhttp.statusText);
+            alert("Unfortunately we can't save this blog");
+          });
         };
       } catch (error) {
-        reject(console.error(error));
+        reject(() => {
+          console.error(error);
+          alert("Unfortunately we can't save this blog");
+        });
       }
     });
   },
@@ -270,8 +288,6 @@ const actions = {
         wait.style.display = 'none';
       } catch (error) {
         console.error(error);
-        //если падает ошибка в консоль(при, например,если не правильно введен сайт),то она просто падает в консоль и все. isTimerWorking = true;
-        //wait.style.display = 'none'; alert("Unfortunately we can't save this blog"); Не отрабатывает.Почему???
         isTimerWorking = true;
         wait.style.display = 'none';
         alert("Unfortunately we can't save this blog");
