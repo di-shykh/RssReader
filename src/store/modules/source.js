@@ -162,11 +162,11 @@ const actions = {
           }
         };
         xmlhttp.onerror = function(e) {
-          console.error(xmlhttp.statusText);
+          reject(console.error(xmlhttp.statusText));
         };
         xmlhttp.send(null);
       } catch (error) {
-        console.error(error);
+        reject(console.error(error));
       }
     });
   },
@@ -227,18 +227,34 @@ const actions = {
           resolve(commit('findRssInUrl', rssFeeds));
         };
         xmlhttp.onerror = function(e) {
-          console.error(xmlhttp.statusText);
+          reject(console.error(xmlhttp.statusText));
         };
       } catch (error) {
-        console.error(error);
+        reject(console.error(error));
       }
     });
   },
   async parseFeed({ commit, dispatch, state }, URL) {
     let newSource;
+    let degrees = 0;
+    let isTimerWorking = false;
+    const wait = document.querySelector('.wait');
+    const elem = document.querySelector('#sync');
+    wait.style.display = 'flex';
+    let loop = setInterval(function() {
+      elem.style.transform = 'rotate(' + degrees + 'deg)';
+      degrees += 5;
+      if (isTimerWorking) {
+        clearInterval(loop);
+      }
+    }, 3);
     try {
       newSource = await dispatch('findCurrentSource', URL);
-      if (newSource) commit('findSource', newSource);
+      if (newSource) {
+        commit('findSource', newSource);
+        isTimerWorking = true;
+        wait.style.display = 'none';
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -250,8 +266,14 @@ const actions = {
             if (source) commit('findSource', source);
           }
         }
+        isTimerWorking = true;
+        wait.style.display = 'none';
       } catch (error) {
         console.error(error);
+        //если падает ошибка в консоль(при, например,если не правильно введен сайт),то она просто падает в консоль и все. isTimerWorking = true;
+        //wait.style.display = 'none'; alert("Unfortunately we can't save this blog"); Не отрабатывает.Почему???
+        isTimerWorking = true;
+        wait.style.display = 'none';
         alert("Unfortunately we can't save this blog");
       }
     }

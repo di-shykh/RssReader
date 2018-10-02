@@ -34,11 +34,10 @@
             <li class="nav-item sidebar-footer">
                 <input id="sidebar-input" class="form-control sidebar-input" type="text" v-show="show" @keyup.enter="addSource">
                 <button class="btn sidebar-button" @click="addSource" v-bind:style="sidebarColor">+Add</button>
-                <!--<button class="btn sidebar-button" @click="findSource" v-bind:style="sidebarColor">+Find</button>-->
             </li>
         </ul>   
     </nav> 
-    <div class="wait" v-show="isRssFeedNotLoaded">
+    <div class="wait">
       <span class="loader">
         <i class="material-icons" id="sync">sync</i>
       </span>  
@@ -55,8 +54,6 @@ export default {
     return {
       show: false,
       someData: '',
-      isRssFeedNotLoaded: false,
-      isTimerWorking: true
     };
   },
   computed: {
@@ -109,41 +106,32 @@ export default {
     },
   },
   methods: {
-    async addSource() {
+    addSource() {
       this.show = true;
       const strSource = document.getElementById('sidebar-input').value;
       if (strSource.trim()) {
         try{
           this.$store.dispatch('source/setSourcesAndFeedsToNull');
           this.isRssFeedNotLoaded=true;
-          this.rotateIcon();
-          const promise=await this.$store.dispatch('source/parseFeed', strSource);
+          const promise= this.$store.dispatch('source/parseFeed', strSource);
           if(this.findedSources){
             this.$router.push('/reader/addsource');
           }
         }
         catch (error) {
-          console.error(error);
+          //doesn't work at all
+          //ошибка в консоль падает,то дальше ничего не происходит
           this.$router.push('/reader/articles');
+          console.error(error);
+          alert("Unfortunately we can't save this blog");
+          const wait = document.querySelector('.wait');
+          wait.style.display = 'none';
         }
         finally{
           document.getElementById('sidebar-input').value = '';
           this.show = false;
-          this.isTimerWorking=false;
-          this.isRssFeedNotLoaded=false;
         }
       }
-    },
-    rotateIcon(){
-      let degrees=0;
-      let loop=setInterval(function(){
-        const elem=document.querySelector('#sync');
-        elem.style.transform = 'rotate('+degrees+'deg)';
-        degrees+=5;
-        if(this.isTimerWorking){
-          clearInterval(loop);
-        }
-      },3);
     },
     openSidebar() {
       this.$store.dispatch('appearance/openWideSidebar');
@@ -194,7 +182,7 @@ ul {
   z-index: 5;
   width: 100%;
   height: 100%;
-  display: flex; /* establish flex container */
+  display: none; /* flex establish flex container */
   flex-direction: column; /* make main axis vertical */
   justify-content: center; /* center items vertically, in this case */
   align-items: center;

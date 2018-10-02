@@ -127,7 +127,7 @@ export default {
     addSource(cat) {
       //check if source is already in db
       let flag=false;
-      this.userSources.map(item => {
+      this.userSources.find(item => {
         if(item.source.rssLink==this.currentSource.rssLink){
           alert('This source already exists!');
           flag=true;
