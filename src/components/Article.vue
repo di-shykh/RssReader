@@ -1,50 +1,74 @@
 <template>
-  <div class="container" @click="isButtonsShown = false">
+  <div 
+    class="container" 
+    @click="hideSosialButtons()"
+  >
     <div class="row header">
-      <div class="col-3 date">{{getDate(article.date)}}</div>
-      <h4 class="col-6" v-html="article.title"></h4>
+      <div class="col-3 date">{{ getDate(article.date) }}</div>
+      <h4 
+        class="col-6" 
+        v-html="article.title"
+      />
       <div class="col-3">
-        <a @click.stop.prevent="markAsReadLater"><i class="material-icons">{{bookmarkStyle}}</i></a>
+        <a @click.stop.prevent="markAsReadLater"><i class="material-icons">{{ bookmarkStyle }}</i></a>
         <a @click.stop.prevent="shareContent()"><i class="material-icons">share</i></a>
-        <div id="share-buttons" v-show="isButtonsShown">
+        <div 
+          v-show="isButtonsShown" 
+          id="share-buttons"
+        >
           <vue-goodshare-facebook 
             :page_url="article.link" 
             title_social="Facebook"
             has_counter
             has_icon
             button_design="outline" 
-          ></vue-goodshare-facebook>
+          />
           <vue-goodshare-vkontakte 
             :page_url="article.link" 
             title_social="Вконтакте"
             has_counter
             has_icon
             button_design="outline" 
-          ></vue-goodshare-vkontakte>
+          />
           <vue-goodshare-twitter 
             :page_url="article.link" 
             title_social="Twitter"
             has_counter
             has_icon
             button_design="outline" 
-          ></vue-goodshare-twitter>
+          />
           <vue-goodshare-googleplus 
             :page_url="article.link" 
             title_social="Google+"
             has_counter
             has_icon
             button_design="outline" 
-          ></vue-goodshare-googleplus>
+          />
         </div>
       </div>
     </div>
-    <div class="row" @click="isButtonsShown = false">
+    <div 
+      class="row" 
+      @click="hideSosialButtons()"
+    >
       <div class="col-4">
-        <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
+        <img 
+          v-if="article.img" 
+          :src="article.img" 
+          alt="article_icon" 
+          class="img-thumbnail"
+        >
       </div>
-      <div class="col-8" v-html="deleteImgTagFromDescr(article.description)"></div>
-      <div class="w-100"></div>
-      <a :href=article.link target="_blank"  class="btn btn-primary col-md-4 offset-md-4">Visit website</a>
+      <div 
+        class="col-8" 
+        v-html="deleteImgTagFromDescr(article.description)" 
+      />
+      <div class="w-100" />
+      <a 
+        :href="article.link" 
+        target="_blank" 
+        class="btn btn-primary col-md-4 offset-md-4"
+      >Visit website</a>
     </div>
   </div>
 </template>
@@ -55,18 +79,18 @@ import VueGoodshareTwitter from 'vue-goodshare/src/providers/Twitter.vue';
 import VueGoodshareGoogleplus from 'vue-goodshare/src/providers/Googleplus.vue';
 
 export default {
+  components: {
+    VueGoodshareFacebook,
+    VueGoodshareVkontakte,
+    VueGoodshareTwitter,
+    VueGoodshareGoogleplus,
+  },
   data() {
     return {
       article: this.$route.params.article,
-      article_key: this.$route.params.article_key,
-      isButtonsShown:false
+      articleKey: this.$route.params.articleKey,
+      isButtonsShown: false,
     };
-  },
-  watch: {
-    $route(to, from) {
-      this.article = to.params.article;
-      this.article_key = to.params.article_key;
-    }
   },
   computed: {
     sources() {
@@ -80,6 +104,22 @@ export default {
     },
     bookmarkStyle() {
       return this.article.readLater ? 'bookmark' : 'bookmark_border';
+    },
+  },
+  watch: {
+    $route(to, from) {
+      this.article = to.params.article;
+      this.articleKey = to.params.articleKey;
+    },
+  },
+  created() {
+    this.article.read = true;
+    const data = this.getArticleData();
+    if (data.source) {
+      this.$store.dispatch('userSources/saveReadArticle', {
+        source: data.source,
+        article: this.article,
+      });
     }
   },
   methods: {
@@ -94,48 +134,35 @@ export default {
           .join(' ');
     },
     markAsReadLater() {
-      this.article.readLater = !this.article.readLater; 
-      const data = this.findDataForChangingStatusOfArticle();
-      if(typeof data.source !== 'undefined'){
+      this.article.readLater = !this.article.readLater;
+      const data = this.getArticleData();
+      if (data.source) {
         this.$store.dispatch('userSources/saveBookmarckedArticles', {
           source: data.source,
-          article: this.article
+          article: this.article,
         });
       }
     },
-    shareContent(){
+    shareContent() {
       this.isButtonsShown = !this.isButtonsShown;
     },
-    findDataForChangingStatusOfArticle(){
+    hideSosialButtons() {
+      this.isButtonsShown = false;
+    },
+    getArticleData() {
       let source;
       this.sources.forEach(element => {
         element.source.articles.forEach(o => {
-          if(o.link === this.article.link){
+          if (o.link === this.article.link) {
             source = element;
           }
-        })
+        });
       });
       return {
-        source
-      }
-    }
+        source,
+      };
+    },
   },
-  created() {
-    this.article.read = true;
-    const data = this.findDataForChangingStatusOfArticle();
-    if(typeof data.source !== 'undefined'){
-      this.$store.dispatch('userSources/saveReadArticle', {
-        source: data.source,
-        article: this.article
-      });
-    }
-  },
-  components: {
-    VueGoodshareFacebook,
-    VueGoodshareVkontakte,
-    VueGoodshareTwitter,
-    VueGoodshareGoogleplus
-  }
 };
 </script>
 <style scoped>
@@ -155,5 +182,3 @@ a i {
   flex-direction: row;
 }
 </style>
-
-

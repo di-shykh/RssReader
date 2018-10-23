@@ -25,57 +25,57 @@ const routes = [
       {
         path: 'addsource',
         name: 'addsource',
-        component: AddSource
+        component: AddSource,
       },
       {
         path: 'articles',
         name: 'articles',
-        component: Articles
+        component: Articles,
       },
       {
         path: 'articles/:sourcename',
         name: 'articlesbysourcename',
-        component: Articles
+        component: Articles,
       },
       {
         path: 'articles/:readLater',
         name: 'articlesReadLater',
-        component: Articles
+        component: Articles,
       },
       {
         path: 'articles/:latestArticles',
         name: 'latestArticles',
-        component: Articles
+        component: Articles,
       },
       {
         path: 'category/:categoryname',
         name: 'articlesbycategory',
-        component: Articles
+        component: Articles,
       },
       {
-        path: 'article/:article/:article_key',
+        path: 'article/:article/:articleKey',
         name: 'article',
-        component: Article
+        component: Article,
       },
       {
         path: 'sources',
         name: 'sources',
-        component: Sources
+        component: Sources,
       },
       {
         path: 'settings',
         name: 'settings',
-        component: Settings
+        component: Settings,
       },
-    ]
+    ],
   },
 
-  { path: '*', redirect: '/home' }
+  { path: '*', redirect: '/home' },
 ];
 
 export const router = new Router({
   mode: 'history',
-  routes
+  routes,
 });
 
 router.beforeEach((to, from, next) => {

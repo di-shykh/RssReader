@@ -12,7 +12,7 @@
   "extends": [
     "airbnb-base",
     "prettier",
-    "plugin:vue/essential",
+    "plugin:vue/recommended",
     "plugin:prettier/recommended",
     "eslint:recommended"
   ],

@@ -1,45 +1,84 @@
 <template>
   <div class="container app-content">
-    <div class="row block" v-for="source in source">
+    <div 
+      v-for="source in source" 
+      class="row block"
+    >
       <div class="row">
-          <div class="col-2">
-              <img :src="source.img" alt="source_icon" v-if="source.img" class="img-thumbnail">
-          </div>
-          <div class="col-10">
-              <h2>{{source.name}}</h2> 
-              <div>{{source.description}}</div>
-              <button class="btn btn-primary float-right" @click="addNewSource($event,source)">Add</button>
-          </div>
+        <div class="col-2">
+          <img 
+            v-if="source.img" 
+            :src="source.img" 
+            alt="source_icon" 
+            class="img-thumbnail"
+          >
+        </div>
+        <div class="col-10">
+          <h2>{{ source.name }}</h2>
+          <div>{{ source.description }}</div>
+          <button 
+            class="btn btn-primary float-right" 
+            @click="addNewSource($event,source)"
+          >Add</button>
+        </div>
       </div>
- 
       <div class="container">
         <div class="row block-of-articles">
           <div v-for="article in articles(source)">
-              <div class="col-2">
-                  <img :src="article.img" alt="article_icon" v-if="article.img" class="img-thumbnail">
-              </div>
-              <div class="col-10">
-                  <h6>{{article.title}}</h6> 
-              </div>
+            <div class="col-2">
+              <img 
+                v-if="article.img" 
+                :src="article.img" 
+                alt="article_icon" 
+                class="img-thumbnail"
+              >
+            </div>
+            <div class="col-10">
+              <h6>{{ article.title }}</h6>
+            </div>
           </div>
         </div>
+      </div>
     </div>
-    </div>  
-    <div v-show="isMenuSourceVisible" class="menu menu-source">
-        <ul class="nav flex-column">
-            <li v-for="cat in userCategories" @click="addSource({key:cat.key,name:cat.category.name,sources:cat.category.sources})">{{cat.category.name}}</li>
-            <li class="nav-item" @click="addNewCatecory($event)">+ New category</li>
-        </ul>
+    <div 
+      v-show="isMenuSourceVisible" 
+      class="menu menu-source"
+    >
+      <ul class="nav flex-column">
+        <li
+          v-for="cat in userCategories"
+          @click="addSource({key:cat.key, name:cat.category.name, sources:cat.category.sources})"
+        >{{ cat.category.name }}</li>
+        <li 
+          class="nav-item" 
+          @click="addNewCatecory($event)"
+        >+ New category</li>
+      </ul>
     </div>
-    <div v-show="isMenuCategoryVisible" class="menu menu-category">
-        <form>
-            <div class="form-group">
-                <label for="catName">Category name</label>
-                <input type="text" id="catName" class="form-control" v-model="category">
-                <button class="btn btn-success" disabled @click.stop.prevent="createNewCategory">Create</button>
-                <button class="btn btn-light" @click.stop.prevent="isMenuCategoryVisible=false">Cancel</button>
-            </div>
-        </form>
+    <div 
+      v-show="isMenuCategoryVisible" 
+      class="menu menu-category"
+    >
+      <form>
+        <div class="form-group">
+          <label for="catName">Category name</label>
+          <input 
+            id="catName" 
+            v-model="category" 
+            type="text" 
+            class="form-control"
+          >
+          <button 
+            class="btn btn-success" 
+            disabled 
+            @click.stop.prevent="createNewCategory"
+          >Create</button>
+          <button 
+            class="btn btn-light" 
+            @click.stop.prevent="isMenuCategoryVisible=false"
+          >Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -52,17 +91,8 @@ export default {
       x: null,
       y: null,
       category: '',
-      currentSource:{}
+      currentSource: {},
     };
-  },
-  watch: {
-    category() {
-      const menu = document.querySelector('.menu-category');
-      const submitButton = menu.querySelector('.btn-success');
-      if (this.category) {
-        submitButton.removeAttribute('disabled');
-      }
-    }
   },
   computed: {
     source() {
@@ -76,11 +106,20 @@ export default {
     },
     userCategories() {
       return this.$store.getters['userSources/categories'];
-    }
+    },
+  },
+  watch: {
+    category() {
+      const menu = document.querySelector('.menu-category');
+      const submitButton = menu.querySelector('.btn-success');
+      if (this.category) {
+        submitButton.removeAttribute('disabled');
+      }
+    },
   },
   methods: {
-    addNewSource(event,source) {
-      this.currentSource=source;
+    addNewSource(event, source) {
+      this.currentSource = source;
       this.isMenuSourceVisible = !this.isMenuSourceVisible;
       const menu = document.querySelector('.menu-source');
       this.x = event.screenX;
@@ -103,18 +142,19 @@ export default {
       }
     },
     createNewCategory() {
-      let flag=false;
-      this.userSources.map(item => {
-        if(item.source.rssLink==this.currentSource.rssLink){
+      let isSourceExists = false;
+      this.userSources.some(item => {
+        if (item.source.rssLink == this.currentSource.rssLink) {
           alert('This source already exists!');
-          flag=true;
-        }       
+          isSourceExists = true;
+        }
       });
-      if(!flag){
+      if (!isSourceExists) {
         if (this.category.trim()) {
+          const category = this.category.trim();
           this.isMenuCategoryVisible = false;
-          this.currentSource.category=this.category;
-          this.$store.dispatch('source/saveCurrentSourceInNewCategory',this.currentSource);
+          this.currentSource.category = category;
+          this.$store.dispatch('source/saveCurrentSourceInNewCategory', this.currentSource);
           this.category = '';
         }
         this.$store.dispatch('userSources/setCurrentSources');
@@ -126,24 +166,27 @@ export default {
     },
     addSource(cat) {
       //check if source is already in db
-      let flag=false;
+      let isSourceExists = false;
       this.userSources.find(item => {
-        if(item.source.rssLink==this.currentSource.rssLink){
+        if (item.source.rssLink == this.currentSource.rssLink) {
           alert('This source already exists!');
-          flag=true;
-        }       
+          isSourceExists = true;
+        }
       });
-      if(!flag){
-        this.currentSource.category=cat.name;
-        this.$store.dispatch('source/saveCurrentSourceInExistCategory',{source:this.currentSource,category_key:cat.key});
+      if (!isSourceExists) {
+        this.currentSource.category = cat.name;
+        this.$store.dispatch('source/saveCurrentSourceInExistCategory', {
+          source: this.currentSource,
+          category_key: cat.key,
+        });
         this.isMenuSourceVisible = false;
         this.$store.dispatch('userSources/setCurrentSources');
         this.$store.dispatch('userSources/setUserCategories');
         this.$router.push('/reader/articles');
       }
       this.isMenuSourceVisible = false;
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -192,5 +235,3 @@ export default {
   margin-top: 10px;
 }
 </style>
-
-

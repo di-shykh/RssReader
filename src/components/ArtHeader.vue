@@ -2,12 +2,32 @@
   <div class="row header">
     <div class="col-12">
       <div class="input-group">   
-        <input type="text" class="form-control" placeholder="Search" v-model.trim="textForSearch" @keyup.enter="findArticle()">
-        <span class="input-group-btn" @click="changeViewOfArticles()">
-          <i class="material-icons" :title="title">{{view}}</i><!--<i class="material-icons">view_module</i>-->
+        <input 
+          v-model.trim="textForSearch" 
+          type="text" 
+          class="form-control" 
+          placeholder="Search" 
+          @keyup.enter="findArticle()"
+        >
+        <span 
+          class="input-group-btn" 
+          @click="changeViewOfArticles()"
+        >
+          <i 
+            class="material-icons" 
+            :title="title"
+          >{{ view }}</i>
         </span>
-        <span class="input-group-btn" @click="updateSources()">
-          <i class="material-icons" title="Update your sources" id="sync">sync</i>
+        <span 
+          class="input-group-btn" 
+          @click="updateSources()"
+        >
+          <i 
+            id="sync" 
+            class="material-icons" 
+            title="Update your sources"
+            :class="{ rotate: isRotate }"
+          >sync</i>
         </span>
       </div>
     </div>
@@ -15,51 +35,39 @@
 </template>
 <script>
 export default {
-  data(){ 
+  data() {
     return {
-      title:'',
-      textForSearch:''
-    }
+      title: '',
+      textForSearch: '',
+      isRotate: false,
+    };
   },
   computed: {
     view() {
       return this.viewList ? 'view_list' : 'view_headline';
     },
-    viewList(){
+    viewList() {
       return this.$store.getters['userSources/viewList'];
-    }
-  },
-  methods:{
-    changeViewOfArticles(){
-      this.$store.dispatch('userSources/changeViewOfArticles');
-      if(this.viewList){
-        this.title = 'Change to title only view';
-      }
-      else{
-        this.title = 'Change to magazine view';
-      }
     },
-    updateSources(){
-      let degrees=0;
-      let loop=setInterval(function(){
-        const elem=document.querySelector('#sync');
-        elem.style.transform = 'rotate('+degrees+'deg)';
-        degrees+=5;
-        if(degrees>359){
-          clearInterval(loop);
-        }
-      },3);
+  },
+  methods: {
+    changeViewOfArticles() {
+      this.$store.dispatch('userSources/changeViewOfArticles');
+      this.title = this.viewList ? 'Change to title only view' : 'Change to magazine view';
+    },
+    updateSources() {
+      this.isRotate = true;
       this.$store.dispatch('userSources/updateSources');
     },
-    findArticle(){
-      if(this.textForSearch.length !== 0){
-        this.$store.dispatch('userSources/findArticle',this.textForSearch);
+    findArticle() {
+      if (this.textForSearch.length !== 0) {
+        this.$store.dispatch('userSources/findArticle', this.textForSearch);
       }
-      if(this.textForSearch.length === 0)
-       this.$store.dispatch('userSources/findArticle',this.textForSearch);
-    }
-  }
-}
+      if (this.textForSearch.length === 0)
+        this.$store.dispatch('userSources/findArticle', this.textForSearch);
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -71,5 +79,25 @@ export default {
   margin-left: 5px;
   cursor: pointer;
 }
+.rotate {
+  -webkit-animation: spin 0.7s linear;
+  -moz-animation: spin 0.7s linear;
+  animation: spin 0.7s linear;
+}
+@-moz-keyframes spin {
+  100% {
+    -moz-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
 </style>
-

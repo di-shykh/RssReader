@@ -39,6 +39,7 @@ const mutations = {
   setSourcesAndFeedsToNull: state => {
     state.source = [];
     state.rssFeeds = [];
+    state.error = false;
   },
 };
 
@@ -231,11 +232,13 @@ const actions = {
               reject(() => {
                 console.error(xmlhttp.statusText);
                 alert("Unfortunately we can't save this blog");
+                state.error;
               });
           } else
             reject(() => {
               console.error(xmlhttp.statusText);
               alert("Unfortunately we can't save this blog");
+              commit('setError');
             });
         };
         xmlhttp.onerror = function(e) {
