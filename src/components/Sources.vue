@@ -214,13 +214,7 @@ export default {
       this.newName = document.querySelector('#newNameInput').value;
       if (this.newName) {
         const source = this.sources.find(o => o.source.name === this.checkedSources[0]);
-        let category;
-        this.categories.forEach(item => {
-          if (item.category.sources)
-            item.category.sources.forEach(o => {
-              if (o === this.checkedSources[0]) category = item;
-            });
-        });
+        const category = this.findCategory(this.checkedSources[0]);
         if (this.newName && source && category)
           this.$store.dispatch('userSources/saveNewSourceName', {
             source_key: source.key,
@@ -235,13 +229,7 @@ export default {
     unfollow() {
       this.checkedSources.forEach(element => {
         let source = this.sources.find(o => o.source.name === element);
-        let category;
-        this.categories.forEach(item => {
-          if (item.category.sources)
-            item.category.sources.forEach(o => {
-              if (o === element) category = item;
-            });
-        });
+        const category = this.findCategory(element);
         if (source && category) {
           this.$store.dispatch('userSources/ufollowSource', {
             source_key: source.key,
@@ -256,30 +244,23 @@ export default {
     },
     changeCategory(event) {
       if (event.target.innerHTML === 'Create') {
-        if (this.newCategoryName.trim().length !== 0) {
-          this.categoryName = this.newCategoryName;
+        const newName = this.newCategoryName.trim();
+        if (newName) {
+          this.categoryName = newName;
           this.$store.dispatch('userSources/createNewCategory', this.categoryName);
         } else alert('Please, enter category name!');
       }
       if (event.target.value) {
-        if (event.target.value.trim().length !== 0) {
-          this.categoryName = event.target.value;
+        const newName = event.target.value.trim();
+        if (newName) {
+          this.categoryName = newName;
           this.$store.dispatch('userSources/createNewCategory', this.categoryName);
         } else alert('Please, enter category name!');
-      } else this.categoryName = event.target.innerHTML;
+      } else this.categoryName = event.target.innerHTML.trim();
       this.checkedSources.forEach(item => {
         let source = this.sources.find(o => o.source.name === item);
-        let oldCategory;
-        this.categories.forEach(item => {
-          if (item.category.sources)
-            item.category.sources.forEach(o => {
-              if (o === source.source.name) oldCategory = item;
-            });
-        });
-        let newCategory;
-        this.categories.forEach(item => {
-          if (item.category.name === this.categoryName) newCategory = item;
-        });
+        let oldCategory = this.findCategory(source.source.name);
+        let newCategory = this.categories.find(item => item.category.name === this.categoryName);
 
         if (source && oldCategory && newCategory) {
           this.$store.dispatch('userSources/changeCategory', {
@@ -305,6 +286,12 @@ export default {
           menu.style.top = `${event.screenY}px`;
         }
       } else alert('You should choose at list one source to change category.');
+    },
+    findCategory(element) {
+      const category = this.categories.find(category =>
+        category.category.sources.some(o => o === element)
+      );
+      return category;
     },
   },
 };

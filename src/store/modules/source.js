@@ -36,7 +36,7 @@ const mutations = {
       };
     }
   },
-  setSourcesAndFeedsToNull: state => {
+  resetSourcesAndFeeds: state => {
     state.source = [];
     state.rssFeeds = [];
     state.error = false;
@@ -47,8 +47,8 @@ const actions = {
   setCurrentSource: ({ commit, state }, source) => {
     commit('setSource', source);
   },
-  setSourcesAndFeedsToNull: ({ commit, state }) => {
-    commit('setSourcesAndFeedsToNull');
+  resetSourcesAndFeeds: ({ commit, state }) => {
+    commit('resetSourcesAndFeeds');
   },
   findCurrentSource({ commit, state }, URL) {
     return new Promise((resolve, reject) => {

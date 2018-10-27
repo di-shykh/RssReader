@@ -191,7 +191,7 @@ export default {
       const strSource = document.getElementById('sidebar-input').value.trim();
       if (strSource) {
         try {
-          this.$store.dispatch('source/setSourcesAndFeedsToNull');
+          this.$store.dispatch('source/resetSourcesAndFeeds');
           this.isRssFeedNotLoaded = true;
           const promise = this.$store.dispatch('source/parseFeed', strSource);
           if (this.findedSources) {

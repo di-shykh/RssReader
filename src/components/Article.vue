@@ -150,15 +150,9 @@ export default {
       this.isButtonsShown = false;
     },
     getArticleData() {
-      let source;
-      this.sources.forEach(element => {
-        element.source.articles.forEach(o => {
-          if (o.link === this.article.link) {
-            source = element;
-          }
-        });
-      });
-
+      const source = this.sources.find(source =>
+        source.source.articles.some(o => o.link === this.article.link)
+      );
       return {
         source,
       };

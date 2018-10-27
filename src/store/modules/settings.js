@@ -2,6 +2,15 @@ import Vue from 'vue';
 import auth from '@/auth';
 import firebase from 'firebase';
 
+const DEFAULT_SETTINGS = {
+  fontFamily: 'sans-serif',
+  fontSize: 'medium',
+  bgColor: '#ffffff',
+  textColor: '#000000',
+  sidebarColor: '#dbe4ee',
+  sidebarTextColor: '#007bff',
+};
+
 const state = {
   settings: null,
 };
@@ -15,22 +24,14 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const sett = userDb.child('settings');
+    const settingsFromDB = userDb.child('settings');
 
-    sett.on(
+    settingsFromDB.on(
       'value',
       function(data) {
         if (!data.exists()) {
-          const settings = {
-            fontFamily: 'sans-serif',
-            fontSize: 'medium',
-            bgColor: '#ffffff',
-            textColor: '#000000',
-            sidebarColor: '#dbe4ee',
-            sidebarTextColor: '#007bff',
-          };
-          sett.set(settings);
-          state.settings = settings;
+          settingsFromDB.set(DEFAULT_SETTINGS);
+          state.settings = DEFAULT_SETTINGS;
         } else {
           let settings = {};
           data.forEach(function(data) {
@@ -48,17 +49,10 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const sett = userDb.child('settings');
-    const settings = {
-      fontFamily: 'sans-serif',
-      fontSize: 'medium',
-      bgColor: '#ffffff',
-      textColor: '#000000',
-      sidebarColor: '#dbe4ee',
-      sidebarTextColor: '#007bff',
-    };
-    sett.set(settings);
-    state.settings = settings;1
+    const settings = userDb.child('settings');
+
+    settings.set(DEFAULT_SETTINGS);
+    state.settings = DEFAULT_SETTINGS;
   },
   setTextColor: (state, data) => {
     state.settings.textColor = data;
@@ -82,8 +76,8 @@ const mutations = {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
-    const sett = userDb.child('settings');
-    sett.set(state.settings);
+    const settings = userDb.child('settings');
+    settings.set(state.settings);
   },
 };
 
