@@ -1,48 +1,128 @@
 <template>
   <div class="container">
     <h1 class="row">Organize your sources</h1>
-    <h3 class="row">Following {{sources.length}} sources</h3>
+    <h3 class="row">Following {{ sources.length }} sources</h3>
     <div class="row">
-      <select class="form-control" :required="true" v-model="selectedCategory" v-on:change="showSourcesInCategory()">
+      <select 
+        v-model="selectedCategory" 
+        class="form-control" 
+        :required="true" 
+        @change="showSourcesInCategory()"
+      >
         <option>All Your Sources</option>
-        <option v-for="category in categories" :value="category.category.name">{{category.category.name}}</option>
+        <option 
+          v-for="category in categories" 
+          :value="category.category.name"
+        >{{ category.category.name }}</option>
       </select>
     </div>
     <div class="row">
       <table class="table table-bordered table-hover">
         <thead>
           <tr>
-            <th scope="col"><input type="checkbox" id="selectAll" @click="checkAll()" v-model="isCheckAll"> <label for="selectAll"> Select All</label></th>
-            <th scope="col"><button class="btn btn-light" v-if="flag" @click="rename()"><i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">edit</i> Rename</button>
-            <button class="btn btn-light" @click="showMenu($event)">Change Category</button>
-            <div class="app-dropdown" v-show="isDropdownVisible">
-              <a class="dropdown-item app-link" style="cursor: auto; text-decoration:none;">Transfer sources to:</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" v-for="category in categories" @click="changeCategory($event)">{{category.category.name}}</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item app-link" @click="isTexboxVisible=true">+ Create new category</a>
-              <div v-show="isTexboxVisible" class="form-group form-for-new-category">
-                <label for="catName">Category name</label>
-                <input type="text" id="catName" class="form-control" v-model.trim="newCategoryName" v-on:keyup.enter="changeCategory($event)">
-                <button class="btn btn-success" disabled @click.stop.prevent="changeCategory($event)">Create</button>
-                <button class="btn btn-light" @click.stop.prevent="isTexboxVisible=false">Cancel</button>
+            <th scope="col"><input 
+              id="selectAll" 
+              v-model="isCheckAll" 
+              type="checkbox" 
+              @click="checkAll()"
+            > <label for="selectAll"> Select All</label></th>
+            <th scope="col"><button 
+              v-if="isButRenameShown" 
+              class="btn btn-light" 
+              @click="findIndexOfSourceForRename()"
+            ><i 
+              class="material-icons" 
+              style="font-size: 20px !important; vertical-align: middle;"
+            >edit</i> Rename</button>
+              <button 
+                class="btn btn-light" 
+                @click="showMenu($event)"
+              >Change Category</button>
+              <div 
+                v-show="isDropdownVisible" 
+                class="app-dropdown"
+              >
+                <a 
+                  class="dropdown-item app-link" 
+                  style="cursor: auto; text-decoration:none;"
+                >Transfer sources to:</a>
+                <div class="dropdown-divider" />
+                <a 
+                  v-for="category in categories" 
+                  class="dropdown-item" 
+                  @click="changeCategory($event)"
+                >{{ category.category.name }}</a>
+                <div class="dropdown-divider" />
+                <a 
+                  class="dropdown-item app-link" 
+                  @click="isTexboxVisible=true"
+                >+ Create new category</a>
+                <div 
+                  v-show="isTexboxVisible" 
+                  class="form-group form-for-new-category"
+                >
+                  <label for="catName">Category name</label>
+                  <input 
+                    id="catName" 
+                    v-model.trim="newCategoryName" 
+                    type="text" 
+                    class="form-control" 
+                    @keyup.enter="changeCategory($event)"
+                  >
+                  <button 
+                    class="btn btn-success" 
+                    disabled 
+                    @click.stop.prevent="changeCategory($event)"
+                  >Create</button>
+                  <button 
+                    class="btn btn-light" 
+                    @click.stop.prevent="isTexboxVisible=false"
+                  >Cancel</button>
+                </div>
               </div>
-          </div>
-            <button class="btn btn-light" @click="unfollow()"><i class="material-icons" style="font-size: 20px !important; vertical-align: middle;">delete</i> Unfollow</button>
+              <button 
+                class="btn btn-light" 
+                @click="unfollow()"
+              ><i 
+                class="material-icons" 
+                style="font-size: 20px !important; vertical-align: middle;"
+              >delete</i> Unfollow</button>
             </th>
           </tr>
         </thead>
         <tbody @click="hideDropdown()">
           <tr v-for="(source,key) in shownSources">
-            <th scope="row"><input type="checkbox" :value="source" v-model="checkedSources" @change='updateCheckAll()'><label for="source"></label></th><!--посмотреть почему не работает чекбокс по клику на ячейке-->
-              <td>
-                <div v-if="key===indexOfCheckedSource">
-                  <input type="text" class="form-control" :value="source" id="newNameInput" required v-on:keyup.enter="saveNewSourceName()">
-                  <button class="btn btn-success" @click="saveNewSourceName()">Save</button>
-                  <button class="btn btn-default" @click.stop.prevent="indexOfCheckedSource=-1">Cancel</button>
-                </div>
-                <label v-else for="source">{{source}}</label>                  
-              </td><!--посмотреть почему не работает чекбокс по клику на ячейке-->
+            <th scope="row"><input 
+              :id="source"
+              v-model="checkedSources" 
+              type="checkbox" 
+              :value="source" 
+              @change="updateCheckAll()"
+            ><label :for="source" /></th>
+            <td>
+              <div v-if="key===indexOfCheckedSource">
+                <input 
+                  id="newNameInput" 
+                  type="text" 
+                  class="form-control" 
+                  :value="source" 
+                  required 
+                  @keyup.enter="saveNewSourceName()"
+                >
+                <button 
+                  class="btn btn-success" 
+                  @click="saveNewSourceName()"
+                >Save</button>
+                <button 
+                  class="btn btn-default" 
+                  @click.stop.prevent="indexOfCheckedSource=-1"
+                >Cancel</button>
+              </div>
+              <label 
+                v-else 
+                :for="source"
+              >{{ source }}</label>                  
+            </td>
           </tr>
         </tbody>
       </table>
@@ -57,13 +137,13 @@ export default {
       shownSources: [],
       checkedSources: [],
       isCheckAll: false,
-      flag: true,
+      isButRenameShown: true,
       indexOfCheckedSource: -1,
       newName: '',
       isDropdownVisible: false,
-      isTexboxVisible:false,
-      newCategoryName:'',
-      categoryName:''
+      isTexboxVisible: false,
+      newCategoryName: '',
+      categoryName: '',
     };
   },
   computed: {
@@ -72,13 +152,13 @@ export default {
     },
     categories() {
       return this.$store.getters['userSources/categories'];
-    }
+    },
   },
   watch: {
     checkedSources() {
       if (this.checkedSources.length > 1) {
-        this.flag = false;
-      } else this.flag = true;
+        this.isButRenameShown = false;
+      } else this.isButRenameShown = true;
     },
     newCategoryName() {
       const menu = document.querySelector('.form-for-new-category');
@@ -86,28 +166,27 @@ export default {
       if (this.newCategoryName) {
         submitButton.removeAttribute('disabled');
       }
-    }
+    },
+  },
+  created() {
+    this.showSourcesInCategory();
   },
   methods: {
     countNumOfSources() {
       return this.sources.length;
     },
-    hideDropdown(){
-      if(this.isDropdownVisible)
-        this.isDropdownVisible=false;
+    hideDropdown() {
+      if (this.isDropdownVisible) this.isDropdownVisible = false;
     },
     checkAll() {
       this.isCheckAll = !this.isCheckAll;
       this.checkedSources = [];
       if (this.isCheckAll) {
-        for (const key in this.shownSources) {
-          this.checkedSources.push(this.shownSources[key]);
-        }
+        this.checkedSources = Object.values(this.shownSources);
       }
     },
     updateCheckAll() {
-      if (this.checkedSources.length === this.shownSources.length)
-        this.isCheckAll = true;
+      if (this.checkedSources.length === this.shownSources.length) this.isCheckAll = true;
       else this.isCheckAll = false;
     },
     showSourcesInCategory() {
@@ -116,142 +195,118 @@ export default {
       if (this.selectedCategory === 'All Your Sources') {
         this.shownSources = [];
         this.sources.map(item => {
-          if(typeof item.source.name!== undefined){
+          if (item.source.name != null) {
             this.shownSources.push(item.source.name);
           }
         });
       } else {
-            this.shownSources = [];
-            this.sources.map(item => {
-            if(item.source.category==this.selectedCategory){
-              this.shownSources.push(item.source.name);
-            }
-          });
-        }
-        
+        this.shownSources = this.sources
+          .filter(item => item.source.category == this.selectedCategory)
+          .map(item => item.source.name);
+      }
     },
-    rename() {
-      this.indexOfCheckedSource = this.shownSources.findIndex(
-        el => el === this.checkedSources[0]
-      );
+    findIndexOfSourceForRename() {
+      this.indexOfCheckedSource = this.shownSources.findIndex(el => el === this.checkedSources[0]);
     },
     saveNewSourceName() {
       this.indexOfCheckedSource = -1;
       //:value="source" conflicts with v-model on the same element because the latter already expands to a value binding internally
       this.newName = document.querySelector('#newNameInput').value;
       if (this.newName) {
-        const source = this.sources.find(
-          o => o.source.name === this.checkedSources[0]
-        );
+        const source = this.sources.find(o => o.source.name === this.checkedSources[0]);
         let category;
-        this.categories.forEach(item =>{
-          if(item.category.sources)
-            item.category.sources.forEach(o=>{
-              if(o===this.checkedSources[0])
-                category=item;
-            })
-        })
-        if(this.newName && source && category)
-         this.$store.dispatch('userSources/saveNewSourceName', {
-          source_key: source.key,
-          category_key: category.key,
-          source_name: source.source.name,
-          new_name: this.newName
+        this.categories.forEach(item => {
+          if (item.category.sources)
+            item.category.sources.forEach(o => {
+              if (o === this.checkedSources[0]) category = item;
+            });
         });
+        if (this.newName && source && category)
+          this.$store.dispatch('userSources/saveNewSourceName', {
+            source_key: source.key,
+            category_key: category.key,
+            source_name: source.source.name,
+            new_name: this.newName,
+          });
         this.checkedSources = [];
         this.showSourcesInCategory();
-      } 
-      else alert('Please, fill the form!');
+      } else alert('Please, fill out the form!');
     },
-    unfollow(){
+    unfollow() {
       this.checkedSources.forEach(element => {
-        let source = this.sources.find(
-          o => o.source.name === element
-        );
+        let source = this.sources.find(o => o.source.name === element);
         let category;
-        this.categories.forEach(item =>{
-          if(item.category.sources)
-            item.category.sources.forEach(o=>{
-              if(o===element)
-                category=item;
-            })
-        }
-      );
-        if(source && category ){
+        this.categories.forEach(item => {
+          if (item.category.sources)
+            item.category.sources.forEach(o => {
+              if (o === element) category = item;
+            });
+        });
+        if (source && category) {
           this.$store.dispatch('userSources/ufollowSource', {
             source_key: source.key,
             category_key: category.key,
-            source_name: source.source.name
-          }); 
-        };
+            source_name: source.source.name,
+          });
+        }
       });
       this.checkedSources = [];
       this.selectedCategory = 'All Your Sources';
       this.showSourcesInCategory();
     },
-    changeCategory(event){
-      if(event.target.innerHTML === 'Create'){
-        if(this.newCategoryName.trim().length!==0){
-          this.categoryName=this.newCategoryName;
-          this.$store.dispatch('userSources/createNewCategory',this.categoryName);
-        }
-        else alert('Please, enter category name!');
+    changeCategory(event) {
+      if (event.target.innerHTML === 'Create') {
+        if (this.newCategoryName.trim().length !== 0) {
+          this.categoryName = this.newCategoryName;
+          this.$store.dispatch('userSources/createNewCategory', this.categoryName);
+        } else alert('Please, enter category name!');
       }
-      if(event.target.value){
-        if(event.target.value.trim().length!==0){
+      if (event.target.value) {
+        if (event.target.value.trim().length !== 0) {
           this.categoryName = event.target.value;
-          this.$store.dispatch('userSources/createNewCategory',this.categoryName);
-        }
-        else alert('Please, enter category name!');
-      }
-      else    
-        this.categoryName = event.target.innerHTML;
+          this.$store.dispatch('userSources/createNewCategory', this.categoryName);
+        } else alert('Please, enter category name!');
+      } else this.categoryName = event.target.innerHTML;
       this.checkedSources.forEach(item => {
         let source = this.sources.find(o => o.source.name === item);
         let oldCategory;
-        this.categories.forEach(item =>{
-          if(item.category.sources)
-            item.category.sources.forEach(o=>{
-              if(o===source.source.name)
-                oldCategory=item;
-            })
+        this.categories.forEach(item => {
+          if (item.category.sources)
+            item.category.sources.forEach(o => {
+              if (o === source.source.name) oldCategory = item;
+            });
         });
         let newCategory;
-        this.categories.forEach(item =>{
-          if(item.category.name===this.categoryName)
-          newCategory=item;
-        });        
-        
-        if(source && oldCategory && newCategory){
+        this.categories.forEach(item => {
+          if (item.category.name === this.categoryName) newCategory = item;
+        });
+
+        if (source && oldCategory && newCategory) {
           this.$store.dispatch('userSources/changeCategory', {
             source_key: source.key,
             old_category_key: oldCategory.key,
             new_category_key: newCategory.key,
-            new_category_name:this.categoryName,
-            source_name:source.source.name
+            new_category_name: this.categoryName,
+            source_name: source.source.name,
           });
         }
       });
       this.isDropdownVisible = false;
-      this.isTexboxVisible=false;
+      this.isTexboxVisible = false;
       this.checkedSources = [];
       this.showSourcesInCategory();
     },
-    showMenu(event){
-      if(this.checkedSources.length !== 0){
+    showMenu(event) {
+      if (this.checkedSources.length !== 0) {
         this.isDropdownVisible = !this.isDropdownVisible;
         const menu = document.querySelector('div.app-dropdown');
         if (menu) {
           menu.style.left = `${event.screenX}px`;
           menu.style.top = `${event.screenY}px`;
         }
-      }
-      else alert('You should choose at list one source to change category.');
-    }
+      } else alert('You should choose at list one source to change category.');
+    },
   },
-  created(){
-    this.showSourcesInCategory();
-  }
 };
 </script>
 <style scoped>
@@ -284,4 +339,3 @@ div.form-for-new-category {
   margin: 5px;
 }
 </style>
-

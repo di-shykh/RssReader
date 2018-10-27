@@ -26,7 +26,6 @@
             id="sync" 
             class="material-icons" 
             title="Update your sources"
-            :class="{ rotate: isRotate }"
           >sync</i>
         </span>
       </div>
@@ -39,7 +38,6 @@ export default {
     return {
       title: '',
       textForSearch: '',
-      isRotate: false,
     };
   },
   computed: {
@@ -53,10 +51,22 @@ export default {
   methods: {
     changeViewOfArticles() {
       this.$store.dispatch('userSources/changeViewOfArticles');
-      this.title = this.viewList ? 'Change to title only view' : 'Change to magazine view';
+      if (this.viewList) {
+        this.title = 'Change to title only view';
+      } else {
+        this.title = 'Change to magazine view';
+      }
     },
     updateSources() {
-      this.isRotate = true;
+      let degrees = 0;
+      let loop = setInterval(function() {
+        const elem = document.querySelector('#sync');
+        elem.style.transform = 'rotate(' + degrees + 'deg)';
+        degrees += 5;
+        if (degrees > 359) {
+          clearInterval(loop);
+        }
+      }, 3);
       this.$store.dispatch('userSources/updateSources');
     },
     findArticle() {
@@ -78,26 +88,5 @@ export default {
 .header span {
   margin-left: 5px;
   cursor: pointer;
-}
-.rotate {
-  -webkit-animation: spin 0.7s linear;
-  -moz-animation: spin 0.7s linear;
-  animation: spin 0.7s linear;
-}
-@-moz-keyframes spin {
-  100% {
-    -moz-transform: rotate(360deg);
-  }
-}
-@-webkit-keyframes spin {
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-@keyframes spin {
-  100% {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
 }
 </style>

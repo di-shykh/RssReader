@@ -146,30 +146,35 @@ export default {
     },
     deleteTagSpan(arr) {
       arr = arr.map(o => {
-        const str1 = '<span class="highlight">';
-        const str2 = '</span>';
-        let indexStart = o.title.indexOf(str1);
-        if (indexStart >= 0) {
-          let indexEnd = o.title.indexOf(str2, indexStart + str1.length);
-          if (indexEnd >= 0) {
-            o.title =
-              o.title.substring(0, indexStart) +
-              o.title.substring(indexStart + str1.length, indexEnd) +
-              o.title.substring(indexEnd + str2.length);
-          }
-        } else {
-          indexStart = o.description.indexOf(str1);
+        try {
+          const str1 = '<span class="highlight">';
+          const str2 = '</span>';
+          let indexStart = o.title.indexOf(str1);
           if (indexStart >= 0) {
-            let indexEnd = o.description.indexOf(str2, indexStart + str1.length);
+            let indexEnd = o.title.indexOf(str2, indexStart + str1.length);
             if (indexEnd >= 0) {
-              o.description =
-                o.description.substring(0, indexStart) +
-                o.description.substring(indexStart + str1.length, indexEnd) +
-                o.description.substring(indexEnd + str2.length);
+              o.title =
+                o.title.substring(0, indexStart) +
+                o.title.substring(indexStart + str1.length, indexEnd) +
+                o.title.substring(indexEnd + str2.length);
+            }
+          } else {
+            indexStart = o.description.indexOf(str1);
+            if (indexStart >= 0) {
+              let indexEnd = o.description.indexOf(str2, indexStart + str1.length);
+              if (indexEnd >= 0) {
+                o.description =
+                  o.description.substring(0, indexStart) +
+                  o.description.substring(indexStart + str1.length, indexEnd) +
+                  o.description.substring(indexEnd + str2.length);
+              }
             }
           }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          return o;
         }
-        return o;
       });
     },
     filterArticles(arr, str) {

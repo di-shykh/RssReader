@@ -121,7 +121,7 @@ export default {
     user() {
       return this.$store.getters['user/user'];
     },
-    flag() {
+    showAllArticlesOrUnreaded() {
       return this.$store.getters['userSources/flag'];
     },
     sources() {
@@ -129,7 +129,7 @@ export default {
     },
   },
   watch: {
-    flag(newValue, oldValue) {
+    showAllArticlesOrUnreaded(newValue, oldValue) {
       if (newValue !== oldValue) {
         this.showArticles();
       }

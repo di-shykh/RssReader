@@ -1,77 +1,91 @@
 <template>
   <div 
-class=" app-sidebar" 
-       @click="openSidebar"
->
-    <div v-show="!isSidebarVisible" 
-class="sidebar-toggle">
+    class=" app-sidebar" 
+    @click="openSidebar"
+  >
+    <div 
+      v-show="!isSidebarVisible" 
+      class="sidebar-toggle"
+    >
       <a>
         <i 
-class="material-icons" 
-           :style="textColor"
->menu</i>
+          class="material-icons" 
+          :style="textColor"
+        >menu</i>
       </a>
     </div>
-    <nav v-show="isSidebarVisible" 
-class="sidebar bg-faded">
+    <nav 
+      v-show="isSidebarVisible" 
+      class="sidebar bg-faded"
+    >
       <ul class="nav nav-pills flex-column">
         <li class="nav-item">
           <router-link 
-tag="a" 
-                       :style="sidebarTextColor" 
-class="nav-link" :to="{ name: 'latestArticles', params: { latestArticles:'latest' }}"
->Latest articles</router-link>
+            tag="a" 
+            :style="sidebarTextColor" 
+            class="nav-link" 
+            :to="{ name: 'latestArticles', params: { latestArticles:'latest' }}"
+          >Latest articles</router-link>
         </li>
         <li 
-class="nav-item" 
-            @click.stop.prevent="closeSidebar"
->
+          class="nav-item" 
+          @click.stop.prevent="closeSidebar"
+        >
           <router-link 
-tag="a" 
-                       :style="sidebarTextColor" 
-class="nav-link" :to="{ name: 'articlesReadLater', params: { readLater:true }}"
->Read later</router-link>
+            tag="a" 
+            :style="sidebarTextColor" 
+            class="nav-link" 
+            :to="{ name: 'articlesReadLater', params: { readLater:true }}"
+          >Read later</router-link>
         </li>
         <li 
-class="nav-item" 
-            @click.stop.prevent="closeSidebar"
->
+          class="nav-item" 
+          @click.stop.prevent="closeSidebar"
+        >
           <router-link 
-tag="a" 
-                       :style="sidebarTextColor" 
-class="nav-link" :to="{ name: 'sources'}"
->Sources <i 
-class="material-icons" 
-                                                                                                      style="font-size: 20px !important; vertical-align: middle;"
->settings</i></router-link>
+            tag="a" 
+            :style="sidebarTextColor" 
+            class="nav-link" 
+            :to="{ name: 'sources'}"
+          >Sources <i 
+            class="material-icons" 
+            style="font-size: 20px !important; vertical-align: middle;"
+          >settings</i></router-link>
         </li>
       </ul>
       <ul class="nav nav-pills flex-column">
         <li 
-class="nav-item" 
-            @click.stop.prevent="closeSidebar"
->
+          class="nav-item" 
+          @click.stop.prevent="closeSidebar"
+        >
           <router-link 
-to="/reader/articles" 
-                       tag="a" 
-:style="sidebarTextColor"
->All</router-link>
+            to="/reader/articles" 
+            tag="a" 
+            :style="sidebarTextColor"
+          >All</router-link>
         </li>
-        <li v-for="cat in userCategories" 
-class="nav-item" @click.stop.prevent="closeSidebar">
+        <li 
+          v-for="cat in userCategories" 
+          class="nav-item" 
+          @click.stop.prevent="closeSidebar"
+        >
           <router-link 
-tag="a" 
-                       class="nav-link" 
-:style="sidebarTextColor" :to="{ name: 'articlesbycategory', params: { categoryname: cat.category.name }}"
->{{ cat.category.name }}</router-link>
+            tag="a" 
+            class="nav-link" 
+            :style="sidebarTextColor" 
+            :to="{ name: 'articlesbycategory', params: { categoryname: cat.category.name }}"
+          >{{ cat.category.name }}</router-link>
           <ul>
-            <li v-for="item in cat.category.sources" 
-class="nav-item" @click.stop.prevent="closeSidebar">
+            <li 
+              v-for="item in cat.category.sources" 
+              class="nav-item" 
+              @click.stop.prevent="closeSidebar"
+            >
               <router-link 
-:style="sidebarTextColor" 
-                           :to="{ name: 'articlesbysourcename', params: { sourcename: item }}" 
-tag="a"
->{{ item }}</router-link>
+                :style="sidebarTextColor" 
+                :to="{ name: 'articlesbysourcename', params: { sourcename: item }}" 
+                tag="a"
+              >{{ item }}</router-link>
             </li>
           </ul>
         </li>
@@ -79,21 +93,26 @@ tag="a"
       <ul class="nav nav-pills flex-column">
         <li class="nav-item sidebar-footer">
           <input 
-id="sidebar-input" 
-                 v-show="show" class="form-control sidebar-input" type="text" @keyup.enter="addSource"
->
+            v-show="show" 
+            id="sidebar-input" 
+            class="form-control sidebar-input" 
+            type="text" 
+            @keyup.enter="addSource"
+          >
           <button 
-class="btn sidebar-button" 
-                  :style="sidebarColor" 
-@click="addSource"
->+Add</button>
+            class="btn sidebar-button" 
+            :style="sidebarColor" 
+            @click="addSource"
+          >+Add</button>
         </li>
       </ul>   
     </nav> 
     <div class="wait">
       <span class="loader">
-        <i id="sync" 
-class="material-icons">sync</i>
+        <i 
+          id="sync" 
+          class="material-icons"
+        >sync</i>
       </span>  
     </div>     
   </div>
@@ -169,8 +188,8 @@ export default {
   methods: {
     addSource() {
       this.show = true;
-      const strSource = document.getElementById('sidebar-input').value;
-      if (strSource.trim()) {
+      const strSource = document.getElementById('sidebar-input').value.trim();
+      if (strSource) {
         try {
           this.$store.dispatch('source/setSourcesAndFeedsToNull');
           this.isRssFeedNotLoaded = true;
