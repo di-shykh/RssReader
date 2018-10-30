@@ -80,7 +80,7 @@ const actions = {
             category: {
               name: data.val().category.name,
               sources:
-                data.val().category.sources != undefined
+                data.val().category.sources != null
                   ? Object.keys(data.val().category.sources).map(
                       key => data.val().category.sources[key]
                     )
@@ -158,12 +158,12 @@ const actions = {
       ref.set(data.new_name);
     }
   },
-  ufollowSource: ({ commit, state }, data) => {
+  unfollowSource: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
 
-    let ref = userDb.child('sources/' + data.source_key);
+    let ref = userDb.child('sources/' + data.sourceKey);
     ref.remove();
 
     ref = userDb.child('categories/' + data.category_key + '/category/sources/');
@@ -184,11 +184,11 @@ const actions = {
       .child('categories/' + data.category_key + '/category/sources/')
       .once('value', function(snapshot) {
         if (snapshot.val() === null) flag = true;
+        if (flag) {
+          ref = userDb.child('categories/' + data.category_key);
+          ref.remove();
+        }
       });
-    if (flag) {
-      ref = userDb.child('categories/' + data.category_key);
-      ref.remove();
-    }
   },
   changeCategory: ({ commit, state }, data) => {
     const db = firebase.database();

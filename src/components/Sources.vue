@@ -217,7 +217,7 @@ export default {
         const category = this.findCategory(this.checkedSources[0]);
         if (this.newName && source && category)
           this.$store.dispatch('userSources/saveNewSourceName', {
-            source_key: source.key,
+            sourceKey: source.key,
             category_key: category.key,
             source_name: source.source.name,
             new_name: this.newName,
@@ -231,8 +231,8 @@ export default {
         let source = this.sources.find(o => o.source.name === element);
         const category = this.findCategory(element);
         if (source && category) {
-          this.$store.dispatch('userSources/ufollowSource', {
-            source_key: source.key,
+          this.$store.dispatch('userSources/unfollowSource', {
+            sourceKey: source.key,
             category_key: category.key,
             source_name: source.source.name,
           });
@@ -264,7 +264,7 @@ export default {
 
         if (source && oldCategory && newCategory) {
           this.$store.dispatch('userSources/changeCategory', {
-            source_key: source.key,
+            sourceKey: source.key,
             old_category_key: oldCategory.key,
             new_category_key: newCategory.key,
             new_category_name: this.categoryName,
