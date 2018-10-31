@@ -146,17 +146,20 @@ const actions = {
 
     ref = userDb.child('categories/' + data.category_key + '/category/sources/');
     let sourceIdInCategory = -1;
-    ref.once('value', function(snapshot) {
-      snapshot.forEach(function(o) {
-        if (o.val() == data.source_name) sourceIdInCategory = o.key;
+    ref
+      .once('value', function(snapshot) {
+        snapshot.forEach(function(o) {
+          if (o.val() == data.source_name) sourceIdInCategory = o.key;
+        });
+      })
+      .then(() => {
+        if (sourceIdInCategory >= 0) {
+          ref = userDb.child(
+            'categories/' + data.category_key + '/category/sources/' + sourceIdInCategory
+          );
+          ref.set(data.new_name);
+        }
       });
-    });
-    if (sourceIdInCategory >= 0) {
-      ref = userDb.child(
-        'categories/' + data.category_key + '/category/sources/' + sourceIdInCategory
-      );
-      ref.set(data.new_name);
-    }
   },
   unfollowSource: ({ commit, state }, data) => {
     const db = firebase.database();
@@ -168,22 +171,27 @@ const actions = {
 
     ref = userDb.child('categories/' + data.category_key + '/category/sources/');
     let sourceIdInCategory = -1;
-    ref.once('value', function(snapshot) {
-      snapshot.forEach(function(o) {
-        if (o.val() == data.source_name) sourceIdInCategory = o.key;
+    ref
+      .once('value', function(snapshot) {
+        snapshot.forEach(function(o) {
+          if (o.val() == data.source_name) sourceIdInCategory = o.key;
+        });
+      })
+      .then(() => {
+        if (sourceIdInCategory >= 0)
+          ref = userDb.child(
+            'categories/' + data.category_key + '/category/sources/' + sourceIdInCategory
+          );
+        ref.remove();
       });
-    });
-    if (sourceIdInCategory >= 0)
-      ref = userDb.child(
-        'categories/' + data.category_key + '/category/sources/' + sourceIdInCategory
-      );
-    ref.remove();
 
     let flag = false;
     ref = userDb
       .child('categories/' + data.category_key + '/category/sources/')
       .once('value', function(snapshot) {
         if (snapshot.val() === null) flag = true;
+      })
+      .then(() => {
         if (flag) {
           ref = userDb.child('categories/' + data.category_key);
           ref.remove();
@@ -195,33 +203,46 @@ const actions = {
     const id = auth.user().uid;
     const userDb = db.ref(id);
     //set new category in source
-    let ref = userDb.child('sources/' + data.source_key + '/source/category');
+    let ref = userDb.child('sources/' + data.sourceKey + '/source/category');
     ref.set(data.new_category_name);
     //remove source from array of sources in old category
     ref = userDb.child('categories/' + data.old_category_key + '/category/sources/');
     let sourceIdInCategory = -1;
-    ref.once('value', function(snapshot) {
-      snapshot.forEach(function(o) {
-        if (o.val() == data.source_name) sourceIdInCategory = o.key;
+    ref
+      .once('value', function(snapshot) {
+        snapshot.forEach(function(o) {
+          if (o.val() == data.source_name) sourceIdInCategory = o.key;
+        });
+      })
+      .then(() => {
+        if (sourceIdInCategory >= 0) {
+          ref = userDb.child(
+            'categories/' + data.old_category_key + '/category/sources/' + sourceIdInCategory
+          );
+          ref.remove();
+        }
       });
-    });
-    if (sourceIdInCategory >= 0) {
-      ref = userDb.child(
-        'categories/' + data.old_category_key + '/category/sources/' + sourceIdInCategory
-      );
-      ref.remove();
-    }
+
     //if array of sources in old category is empty, remove category
     let flag = false;
     ref = userDb
       .child('categories/' + data.old_category_key + '/category/sources/')
       .once('value', function(snapshot) {
-        if (snapshot.val() === null) flag = true;
-      });
-    if (flag) {
-      ref = userDb.child('categories/' + data.old_category_key);
-      ref.remove();
-    }
+        alert(snapshot.val()); //почему если category/sources не существует,в snapshot.val() - предыдущий потомок category,т.е. /category/name
+        //как тогда определить, что /category/sources/ не существует?
+        if (!snapshot.exists() || snapshot.val() === null) flag = true;
+        //не работает,флаг всегда false
+        if (flag) {
+          ref = userDb.child('categories/' + data.old_category_key);
+          ref.remove();
+        }
+      }); /*и так тоже не работает .then(() => {
+        if (flag) {
+          ref = userDb.child('categories/' + data.old_category_key);
+          ref.remove();
+        }
+       }) ;*/
+
     //add source to array of sources in new category
     ref = userDb.child('categories/' + data.new_category_key + '/category/sources/').limitToLast(1);
     let source_key;
@@ -361,7 +382,7 @@ const actions = {
           }
         };
         xmlhttp.onerror = function(e) {
-          console.error(xhr.statusText);
+          console.error(xmlhttp.statusText);
         };
         xmlhttp.send(null);
       } catch (error) {
