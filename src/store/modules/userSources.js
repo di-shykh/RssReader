@@ -166,95 +166,93 @@ const actions = {
     const id = auth.user().uid;
     const userDb = db.ref(id);
 
-    let ref = userDb.child('sources/' + data.sourceKey);
-    ref.remove();
+    const refToSource = userDb.child('sources/' + data.sourceKey);
+    refToSource.remove();
 
-    ref = userDb.child('categories/' + data.category_key + '/category/sources/');
-    let sourceIdInCategory = -1;
-    ref
+    const refToSourcesInCategory = userDb.child(
+      'categories/' + data.category_key + '/category/sources/'
+    );
+    refToSourcesInCategory
       .once('value', function(snapshot) {
+        let sourceIdInCategory = -1;
         snapshot.forEach(function(o) {
           if (o.val() == data.source_name) sourceIdInCategory = o.key;
         });
-      })
-      .then(() => {
-        if (sourceIdInCategory >= 0)
-          ref = userDb.child(
+        if (sourceIdInCategory >= 0) {
+          const refToSourcesInCategoryForRemove = userDb.child(
             'categories/' + data.category_key + '/category/sources/' + sourceIdInCategory
           );
-        ref.remove();
-      });
-
-    let flag = false;
-    ref = userDb
-      .child('categories/' + data.category_key + '/category/sources/')
-      .once('value', function(snapshot) {
-        if (snapshot.val() === null) flag = true;
+          refToSourcesInCategoryForRemove.remove();
+        }
       })
       .then(() => {
-        if (flag) {
-          ref = userDb.child('categories/' + data.category_key);
-          ref.remove();
-        }
+        const refToSourcesInCategory = userDb
+          .child('categories/' + data.category_key + '/category/sources/')
+          .once('value', function(snapshot) {
+            if (!snapshot.exists() || snapshot.val() === null) {
+              const refToCategory = userDb.child('categories/' + data.category_key);
+              refToCategory.remove();
+            }
+          });
       });
   },
   changeCategory: ({ commit, state }, data) => {
     const db = firebase.database();
     const id = auth.user().uid;
     const userDb = db.ref(id);
+
     //set new category in source
-    let ref = userDb.child('sources/' + data.sourceKey + '/source/category');
-    ref.set(data.new_category_name);
+    const refToCategoryInSources = userDb.child('sources/' + data.sourceKey + '/source/category');
+    refToCategoryInSources.set(data.new_category_name);
+
     //remove source from array of sources in old category
-    ref = userDb.child('categories/' + data.old_category_key + '/category/sources/');
-    let sourceIdInCategory = -1;
-    ref
+    const refToSourcesInCategory = userDb.child(
+      'categories/' + data.old_category_key + '/category/sources/'
+    );
+    refToSourcesInCategory
       .once('value', function(snapshot) {
+        let sourceIdInCategory = -1;
         snapshot.forEach(function(o) {
-          if (o.val() == data.source_name) sourceIdInCategory = o.key;
+          if (o.val() == data.source_name) {
+            sourceIdInCategory = o.key;
+          }
         });
-      })
-      .then(() => {
         if (sourceIdInCategory >= 0) {
-          ref = userDb.child(
+          const refToSourcesInCategory = userDb.child(
             'categories/' + data.old_category_key + '/category/sources/' + sourceIdInCategory
           );
-          ref.remove();
+          refToSourcesInCategory.remove();
         }
+      })
+      .then(() => {
+        //if array of sources in old category is empty, remove category
+        const refToSourcesToRemoveInCategory = userDb
+          .child('categories/' + data.old_category_key + '/category/sources/')
+          .once('value', function(snapshot) {
+            if (!snapshot.exists() || snapshot.val() === null) {
+              const refToCategoryToRemove = userDb.child('categories/' + data.old_category_key);
+              refToCategoryToRemove.remove();
+            }
+          });
       });
 
-    //if array of sources in old category is empty, remove category
-    let flag = false;
-    ref = userDb
-      .child('categories/' + data.old_category_key + '/category/sources/')
-      .once('value', function(snapshot) {
-        alert(snapshot.val()); //почему если category/sources не существует,в snapshot.val() - предыдущий потомок category,т.е. /category/name
-        //как тогда определить, что /category/sources/ не существует?
-        if (!snapshot.exists() || snapshot.val() === null) flag = true;
-        //не работает,флаг всегда false
-        if (flag) {
-          ref = userDb.child('categories/' + data.old_category_key);
-          ref.remove();
-        }
-      }); /*и так тоже не работает .then(() => {
-        if (flag) {
-          ref = userDb.child('categories/' + data.old_category_key);
-          ref.remove();
-        }
-       }) ;*/
-
     //add source to array of sources in new category
-    ref = userDb.child('categories/' + data.new_category_key + '/category/sources/').limitToLast(1);
-    let source_key;
-    ref.once('value', function(snapshot) {
+    const refToSourcesInNewCategory = userDb
+      .child('categories/' + data.new_category_key + '/category/sources/')
+      .limitToLast(1);
+
+    refToSourcesInNewCategory.once('value', function(snapshot) {
+      let source_key;
       snapshot.forEach(function(data) {
         source_key = data.key;
       });
+      source_key = parseInt(source_key) + 1;
+      if (!source_key) source_key = 0;
+      const refToSourcesInNewCategoryToSet = userDb.child(
+        'categories/' + data.new_category_key + '/category/sources/' + source_key
+      );
+      refToSourcesInNewCategoryToSet.set(data.source_name);
     });
-    source_key = parseInt(source_key) + 1;
-    if (!source_key) source_key = 0;
-    ref = userDb.child('categories/' + data.new_category_key + '/category/sources/' + source_key);
-    ref.set(data.source_name);
   },
   createNewCategory: ({ commit, state }, data) => {
     const db = firebase.database();
