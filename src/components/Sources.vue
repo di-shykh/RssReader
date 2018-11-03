@@ -35,8 +35,9 @@
               style="font-size: 20px !important; vertical-align: middle;"
             >edit</i> Rename</button>
               <button 
+                id="changeCategory"
                 class="btn btn-light" 
-                @click="showMenu($event)"
+                @click="showMenu()"
               >Change Category</button>
               <div 
                 v-show="isDropdownVisible" 
@@ -277,15 +278,22 @@ export default {
       this.checkedSources = [];
       this.showSourcesInCategory();
     },
-    showMenu(event) {
+    showMenu() {
       if (this.checkedSources.length !== 0) {
         this.isDropdownVisible = !this.isDropdownVisible;
         const menu = document.querySelector('div.app-dropdown');
-        if (menu) {
-          menu.style.left = `${event.screenX}px`;
-          menu.style.top = `${event.screenY}px`;
-        }
+        this.setCoordinatsOfPopUpMenu(menu);
       } else alert('You should choose at list one source to change category.');
+    },
+    setCoordinatsOfPopUpMenu(menu) {
+      const buttonChangeCategory = document.querySelector('#changeCategory');
+      const rec = buttonChangeCategory.getBoundingClientRect();
+      this.x = rec.left + window.scrollX;
+      this.y = rec.top + window.scrollY;
+      if (menu) {
+        menu.style.left = `${this.x - 200}px`;
+        menu.style.top = `${this.y + 50}px`;
+      }
     },
     findCategory(element) {
       const category = this.categories.find(category =>

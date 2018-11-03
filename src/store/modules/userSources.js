@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import auth from '@/auth';
+import 'es6-promise/auto';
 import firebase from 'firebase';
 
 const state = {
@@ -271,21 +272,33 @@ const actions = {
   changeViewOfArticles: ({ commit, state }) => {
     commit('changeViewOfArticles');
   },
-  updateSources: ({ commit, state }) => {
-    state.sources.forEach(item => {
-      const db = firebase.database();
-      const id = auth.user().uid;
-      const userDb = db.ref(id);
-
+  updateSources: ({ commit, dispatch, state }) => {
+    const db = firebase.database();
+    const id = auth.user().uid;
+    const userDb = db.ref(id);
+    state.sources.forEach(async item => {
+      const articles = await dispatch('downloadSourceArticlesFromURL', item);
+      if (articles) {
+        let data = {
+          source: item,
+          articles: articles,
+          userDb: userDb,
+        };
+        dispatch('updateArticles', data);
+      }
+    });
+  },
+  downloadSourceArticlesFromURL({ commit, state }, source) {
+    return new Promise((resolve, reject) => {
       try {
         const xmlhttp = new XMLHttpRequest();
-        URL = 'https://cors-anywhere.herokuapp.com/' + item.source.rssLink;
+        const URL = 'https://cors-anywhere.herokuapp.com/' + source.source.rssLink;
         xmlhttp.open('GET', URL, true);
         xmlhttp.onload = function(e) {
-          if (xmlhttp.readyState === 4) {
-            if (xmlhttp.status === 200) {
-              const xmlDoc = xmlhttp.responseXML;
-              const articles = [];
+          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+            const xmlDoc = xmlhttp.responseXML;
+            if (xmlDoc && xmlDoc.evaluate) {
+              let articles = [];
               const nodesSnapshot = xmlDoc.evaluate(
                 '//channel/item',
                 xmlDoc,
@@ -351,41 +364,45 @@ const actions = {
               for (let i = 0; i < articlesImg.snapshotLength; i++) {
                 articles[i].img = articlesImg.snapshotItem(i).textContent;
               }
-
-              articles.forEach(o => {
-                let flag = false;
-                let ref = userDb
-                  .child('sources/' + item.key + '/source/articles/')
-                  .orderByChild('link')
-                  .equalTo(o.link);
-                ref.once('value', function(snapshot) {
-                  if (snapshot.val()) flag = true;
-                });
-                ref = userDb.child('sources/' + item.key + '/source/articles/').limitToLast(1);
-                let article_key;
-                ref.once('value', function(snapshot) {
-                  snapshot.forEach(function(data) {
-                    article_key = data.key;
-                  });
-                });
-                if (!flag) {
-                  article_key = parseInt(article_key) + 1;
-                  ref = userDb.child('sources/' + item.key + '/source/articles/' + article_key);
-                  ref.set(o);
-                }
-              });
-            } else {
-              console.error(xmlhttp.statusText);
+              resolve(articles);
             }
+          } else {
+            reject(console.error(xmlhttp.statusText));
           }
         };
         xmlhttp.onerror = function(e) {
-          console.error(xmlhttp.statusText);
+          reject(console.error(xmlhttp.statusText));
         };
         xmlhttp.send(null);
       } catch (error) {
-        console.error(error);
+        reject(console.error(error));
       }
+    });
+  },
+  updateArticles: ({ commit, state }, data) => {
+    data.articles.forEach(o => {
+      const refToArticles = data.userDb
+        .child('sources/' + data.source.key + '/source/articles/')
+        .orderByChild('link')
+        .equalTo(o.link);
+      refToArticles.once('value', function(snapshot) {
+        if (!snapshot.val()) {
+          const refToLastArticle = data.userDb
+            .child('sources/' + data.source.key + '/source/articles/')
+            .limitToLast(1);
+          refToLastArticle.once('value', function(snapshot) {
+            let article_key;
+            snapshot.forEach(function(data) {
+              article_key = data.key;
+            });
+            article_key = parseInt(article_key) + 1;
+            const refToNewArticle = data.userDb.child(
+              'sources/' + data.source.key + '/source/articles/' + article_key
+            );
+            refToNewArticle.set(o);
+          });
+        }
+      });
     });
   },
   findArticle: ({ commit, state }, text) => {

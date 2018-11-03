@@ -17,8 +17,9 @@
           <h2>{{ source.name }}</h2>
           <div>{{ source.description }}</div>
           <button 
+            id="add" 
             class="btn btn-primary float-right" 
-            @click="addNewSource($event,source)"
+            @click="addNewSource(source)"
           >Add</button>
         </div>
       </div>
@@ -118,16 +119,11 @@ export default {
     },
   },
   methods: {
-    addNewSource(event, source) {
+    addNewSource(source) {
       this.currentSource = source;
       this.isMenuSourceVisible = !this.isMenuSourceVisible;
       const menu = document.querySelector('.menu-source');
-      this.x = event.screenX;
-      this.y = event.screenY;
-      if (menu) {
-        menu.style.left = `${this.x - 230}px`;
-        menu.style.top = `${this.y - 10}px`;
-      }
+      this.setCoordinatsOfPopUpMenu(menu);
     },
     articles(source) {
       return source.articles.slice(0, 3);
@@ -136,9 +132,16 @@ export default {
       this.isMenuSourceVisible = false;
       this.isMenuCategoryVisible = !this.isMenuCategoryVisible;
       const menu = document.querySelector('.menu-category');
+      this.setCoordinatsOfPopUpMenu(menu);
+    },
+    setCoordinatsOfPopUpMenu(menu) {
+      const buttonAdd = document.querySelector('#add');
+      const rec = buttonAdd.getBoundingClientRect();
+      this.x = rec.left + window.scrollX;
+      this.y = rec.top + window.scrollY;
       if (menu) {
-        menu.style.left = `${this.x - 230}px`;
-        menu.style.top = `${this.y - 10}px`;
+        menu.style.left = `${this.x - 200}px`;
+        menu.style.top = `${this.y + 50}px`;
       }
     },
     createNewCategory() {
