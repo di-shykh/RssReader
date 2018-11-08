@@ -288,7 +288,7 @@ const actions = {
       }
     });
   },
-  downloadSourceArticlesFromURL({ commit, state }, source) {
+  downloadSourceArticlesFromURL({ commit, dispatch, state }, source) {
     return new Promise((resolve, reject) => {
       try {
         const xmlhttp = new XMLHttpRequest();
@@ -298,72 +298,7 @@ const actions = {
           if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
             const xmlDoc = xmlhttp.responseXML;
             if (xmlDoc && xmlDoc.evaluate) {
-              let articles = [];
-              const nodesSnapshot = xmlDoc.evaluate(
-                '//channel/item',
-                xmlDoc,
-                null,
-                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-                null
-              );
-              for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-                const article = {
-                  title: '',
-                  link: '',
-                  description: '',
-                  date: '',
-                  img: '',
-                  read: false,
-                  readLater: false,
-                };
-                article.title = nodesSnapshot
-                  .snapshotItem(i)
-                  .getElementsByTagName('title')[0].textContent;
-                article.link = nodesSnapshot
-                  .snapshotItem(i)
-                  .getElementsByTagName('link')[0].textContent;
-                article.description = nodesSnapshot
-                  .snapshotItem(i)
-                  .getElementsByTagName('description')[0].textContent;
-                article.date = nodesSnapshot
-                  .snapshotItem(i)
-                  .getElementsByTagName('pubDate')[0].textContent;
-                articles.push(article);
-              }
-              var namespaceResolver = (function() {
-                var prefixMap = {
-                  media: 'http://search.yahoo.com/mrss/',
-                  ynews: 'http://news.yahoo.com/rss/',
-                };
-                return function(prefix) {
-                  return prefixMap[prefix] || null;
-                };
-              })();
-              const articlesImg = xmlDoc.evaluate(
-                '//channel/item/media:thumbnail/@url',
-                xmlDoc,
-                namespaceResolver,
-                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-                null
-              )
-                ? xmlDoc.evaluate(
-                    '//channel/item/media:thumbnail/@url',
-                    xmlDoc,
-                    namespaceResolver,
-                    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-                    null
-                  )
-                : xmlDoc.evaluate(
-                    '//channel/item/media:content/@url',
-                    xmlDoc,
-                    namespaceResolver,
-                    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-                    null
-                  );
-
-              for (let i = 0; i < articlesImg.snapshotLength; i++) {
-                articles[i].img = articlesImg.snapshotItem(i).textContent;
-              }
+              const articles = dispatch('parseSource', xmlDoc);
               resolve(articles);
             }
           } else {
@@ -378,6 +313,69 @@ const actions = {
         reject(console.error(error));
       }
     });
+  },
+  parseSource: ({ commit, state }, xmlDoc) => {
+    let articles = [];
+    const nodesSnapshot = xmlDoc.evaluate(
+      '//channel/item',
+      xmlDoc,
+      null,
+      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+      null
+    );
+    for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+      const article = {
+        title: '',
+        link: '',
+        description: '',
+        date: '',
+        img: '',
+        read: false,
+        readLater: false,
+      };
+      article.title = nodesSnapshot.snapshotItem(i).getElementsByTagName('title')[0].textContent;
+      article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
+      article.description = nodesSnapshot
+        .snapshotItem(i)
+        .getElementsByTagName('description')[0].textContent;
+      article.date = nodesSnapshot.snapshotItem(i).getElementsByTagName('pubDate')[0].textContent;
+      articles.push(article);
+    }
+    var namespaceResolver = (function() {
+      var prefixMap = {
+        media: 'http://search.yahoo.com/mrss/',
+        ynews: 'http://news.yahoo.com/rss/',
+      };
+      return function(prefix) {
+        return prefixMap[prefix] || null;
+      };
+    })();
+    const articlesImg = xmlDoc.evaluate(
+      '//channel/item/media:thumbnail/@url',
+      xmlDoc,
+      namespaceResolver,
+      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+      null
+    )
+      ? xmlDoc.evaluate(
+          '//channel/item/media:thumbnail/@url',
+          xmlDoc,
+          namespaceResolver,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        )
+      : xmlDoc.evaluate(
+          '//channel/item/media:content/@url',
+          xmlDoc,
+          namespaceResolver,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        );
+
+    for (let i = 0; i < articlesImg.snapshotLength; i++) {
+      articles[i].img = articlesImg.snapshotItem(i).textContent;
+    }
+    return articles;
   },
   updateArticles: ({ commit, state }, data) => {
     data.articles.forEach(o => {
