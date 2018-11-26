@@ -14,6 +14,156 @@ const getters = {
   rssFeeds: state => state.rssFeeds,
 };
 
+function parseSource(xmlDoc) {
+  function findItemValue(xpath) {
+    return xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
+      .childNodes[0].nodeValue;
+  }
+
+  const title = findItemValue('//channel/title');
+  const url = findItemValue('//channel/link');
+  const text = findItemValue('//channel/description');
+  let img = '';
+  if (
+    xmlDoc.evaluate('//channel/image/url', xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
+  ) {
+    img = findItemValue('//channel/image/url');
+  }
+  const articles = [];
+  const nodesSnapshot = xmlDoc.evaluate(
+    '//channel/item',
+    xmlDoc,
+    null,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null
+  );
+
+  for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+    const article = {
+      title: '',
+      link: '',
+      description: '',
+      date: '',
+      img: '',
+      read: false,
+      readLater: false,
+    };
+    article.title = nodesSnapshot.snapshotItem(i).getElementsByTagName('title')[0].textContent;
+    article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
+    article.description = nodesSnapshot
+      .snapshotItem(i)
+      .getElementsByTagName('description')[0].textContent;
+    article.date = nodesSnapshot.snapshotItem(i).getElementsByTagName('pubDate')[0].textContent;
+    articles.push(article);
+  }
+  var namespaceResolver = (function() {
+    var prefixMap = {
+      media: 'http://search.yahoo.com/mrss/',
+      ynews: 'http://news.yahoo.com/rss/',
+    };
+    return function(prefix) {
+      return prefixMap[prefix] || null;
+    };
+  })();
+  const articlesImg = xmlDoc.evaluate(
+    '//channel/item/media:thumbnail/@url',
+    xmlDoc,
+    namespaceResolver,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null
+  )
+    ? xmlDoc.evaluate(
+        '//channel/item/media:thumbnail/@url',
+        xmlDoc,
+        namespaceResolver,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      )
+    : xmlDoc.evaluate(
+        '//channel/item/media:content/@url',
+        xmlDoc,
+        namespaceResolver,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+        null
+      );
+
+  for (let i = 0; i < articlesImg.snapshotLength; i++) {
+    articles[i].img = articlesImg.snapshotItem(i).textContent;
+  }
+  const newSource = {
+    name: title,
+    link: url,
+    description: text,
+    img: img,
+    rssLink: URL,
+    articles,
+  };
+  return newSource;
+}
+function getRssURLsFromXml(xmlDoc) {
+  const nodesSnapshot = xmlDoc.evaluate(
+    '//link[@type="application/rss+xml"]/@href',
+    xmlDoc,
+    null,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null
+  );
+  let rssFeeds = [];
+  for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+    rssFeeds.push(nodesSnapshot.snapshotItem(i).textContent);
+  }
+  return rssFeeds;
+}
+function findRssInUrl(URL) {
+  return new Promise((resolve, reject) => {
+    try {
+      const xmlhttp = new XMLHttpRequest();
+      URL = 'https://cors-anywhere.herokuapp.com/' + URL;
+      xmlhttp.open('GET', URL);
+      xmlhttp.responseType = 'document';
+      xmlhttp.send();
+      xmlhttp.onload = function() {
+        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+          const xmlDoc = this.responseXML;
+          const rssFeeds = getRssURLsFromXml(xmlDoc);
+          resolve(rssFeeds);
+        } else reject(console.error(xmlhttp.statusText));
+      };
+      xmlhttp.onerror = function(e) {
+        reject(console.error(e));
+      };
+    } catch (error) {
+      reject(console.error(error));
+    }
+  });
+}
+function findCurrentSource(URL) {
+  return new Promise((resolve, reject) => {
+    try {
+      const xmlhttp = new XMLHttpRequest();
+      const proxyURL = 'https://cors-anywhere.herokuapp.com/' + URL;
+      xmlhttp.open('GET', proxyURL, true);
+      xmlhttp.onload = function(e) {
+        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+          const xmlDoc = xmlhttp.responseXML;
+          if (xmlDoc && xmlDoc.evaluate) {
+            const newSource = parseSource(xmlDoc);
+            resolve(newSource);
+          } else {
+            reject(console.error(xmlhttp.statusText));
+          }
+        } else reject(console.error(xmlhttp.statusText));
+      };
+      xmlhttp.onerror = function(e) {
+        reject(console.error(xmlhttp.statusText));
+      };
+      xmlhttp.send(null);
+    } catch (error) {
+      reject(console.error(error));
+    }
+  });
+}
+
 const mutations = {
   setSource: (state, source) => {
     state.source = source;
@@ -50,118 +200,6 @@ const actions = {
   resetSourcesAndFeeds: ({ commit, state }) => {
     commit('resetSourcesAndFeeds');
   },
-  findCurrentSource({ commit, dispatch, state }, URL) {
-    return new Promise((resolve, reject) => {
-      try {
-        const xmlhttp = new XMLHttpRequest();
-        const proxyURL = 'https://cors-anywhere.herokuapp.com/' + URL;
-        xmlhttp.open('GET', proxyURL, true);
-        xmlhttp.onload = function(e) {
-          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            const xmlDoc = xmlhttp.responseXML;
-            if (xmlDoc && xmlDoc.evaluate) {
-              const newSource = dispatch('parseSource', xmlDoc);
-              resolve(newSource);
-            } else {
-              reject(console.error(xmlhttp.statusText));
-            }
-          } else reject(console.error(xmlhttp.statusText));
-        };
-        xmlhttp.onerror = function(e) {
-          reject(console.error(xmlhttp.statusText));
-        };
-        xmlhttp.send(null);
-      } catch (error) {
-        reject(console.error(error));
-      }
-    });
-  },
-  parseSource: ({ commit, state }, xmlDoc) => {
-    function findItemValue(xpath) {
-      return xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
-        .childNodes[0].nodeValue;
-    }
-
-    const title = findItemValue('//channel/title');
-    const url = findItemValue('//channel/link');
-    const text = findItemValue('//channel/description');
-    let img = '';
-    if (
-      xmlDoc.evaluate('//channel/image/url', xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
-    ) {
-      img = findItemValue('//channel/image/url');
-    }
-    const articles = [];
-    const nodesSnapshot = xmlDoc.evaluate(
-      '//channel/item',
-      xmlDoc,
-      null,
-      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-      null
-    );
-
-    for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-      const article = {
-        title: '',
-        link: '',
-        description: '',
-        date: '',
-        img: '',
-        read: false,
-        readLater: false,
-      };
-      article.title = nodesSnapshot.snapshotItem(i).getElementsByTagName('title')[0].textContent;
-      article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
-      article.description = nodesSnapshot
-        .snapshotItem(i)
-        .getElementsByTagName('description')[0].textContent;
-      article.date = nodesSnapshot.snapshotItem(i).getElementsByTagName('pubDate')[0].textContent;
-      articles.push(article);
-    }
-    var namespaceResolver = (function() {
-      var prefixMap = {
-        media: 'http://search.yahoo.com/mrss/',
-        ynews: 'http://news.yahoo.com/rss/',
-      };
-      return function(prefix) {
-        return prefixMap[prefix] || null;
-      };
-    })();
-    const articlesImg = xmlDoc.evaluate(
-      '//channel/item/media:thumbnail/@url',
-      xmlDoc,
-      namespaceResolver,
-      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-      null
-    )
-      ? xmlDoc.evaluate(
-          '//channel/item/media:thumbnail/@url',
-          xmlDoc,
-          namespaceResolver,
-          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-          null
-        )
-      : xmlDoc.evaluate(
-          '//channel/item/media:content/@url',
-          xmlDoc,
-          namespaceResolver,
-          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-          null
-        );
-
-    for (let i = 0; i < articlesImg.snapshotLength; i++) {
-      articles[i].img = articlesImg.snapshotItem(i).textContent;
-    }
-    const newSource = {
-      name: title,
-      link: url,
-      description: text,
-      img: img,
-      rssLink: URL,
-      articles,
-    };
-    return newSource;
-  },
   saveCurrentSourceInNewCategory: ({ commit, state }, source) => {
     const db = firebase.database();
     const id = auth.user().uid;
@@ -195,44 +233,7 @@ const actions = {
     userDb.child('sources').push({ source });
   },
 
-  findRssInUrl({ commit, dispatch, state }, URL) {
-    return new Promise((resolve, reject) => {
-      try {
-        const xmlhttp = new XMLHttpRequest();
-        URL = 'https://cors-anywhere.herokuapp.com/' + URL;
-        xmlhttp.open('GET', URL);
-        xmlhttp.responseType = 'document';
-        xmlhttp.send();
-        xmlhttp.onload = function() {
-          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            const xmlDoc = this.responseXML;
-            const rssFeeds = dispatch('getRssURLsFromXml', xmlDoc);
-            resolve(rssFeeds);
-          } else reject(console.error(xmlhttp.statusText));
-        };
-        xmlhttp.onerror = function(e) {
-          reject(console.error(e));
-        };
-      } catch (error) {
-        reject(console.error(error));
-      }
-    });
-  },
-  getRssURLsFromXml: ({ commit, state }, xmlDoc) => {
-    const nodesSnapshot = xmlDoc.evaluate(
-      '//link[@type="application/rss+xml"]/@href',
-      xmlDoc,
-      null,
-      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-      null
-    );
-    let rssFeeds = [];
-    for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-      rssFeeds.push(nodesSnapshot.snapshotItem(i).textContent);
-    }
-    return rssFeeds;
-  },
-  async parseFeed({ commit, dispatch, state }, URL) {
+  async parseFeed({ commit, state }, URL) {
     let newSource;
 
     const wait = document.querySelector('.wait');
@@ -240,7 +241,7 @@ const actions = {
     wait.style.display = 'flex';
     elem.classList.add('rotate');
     try {
-      newSource = await dispatch('findCurrentSource', URL);
+      newSource = await findCurrentSource(URL);
       if (newSource) {
         commit('findSource', newSource);
         elem.classList.remove('rotate');
@@ -251,10 +252,10 @@ const actions = {
     } finally {
       try {
         if (!newSource) {
-          const feeds = await dispatch('findRssInUrl', URL);
+          const feeds = await findRssInUrl(URL);
           commit('findRssInUrl', feeds);
           for (let i = 0; i < state.rssFeeds.length; i++) {
-            let source = await dispatch('findCurrentSource', state.rssFeeds[i]);
+            let source = await findCurrentSource(state.rssFeeds[i]);
             if (source) commit('findSource', source);
           }
         }
