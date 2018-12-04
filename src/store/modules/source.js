@@ -14,91 +14,97 @@ const getters = {
   rssFeeds: state => state.rssFeeds,
 };
 
-function parseSource(xmlDoc) {
-  function findItemValue(xpath) {
-    return xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
-      .childNodes[0].nodeValue;
-  }
+function parseSource(xmlDoc, URL) {
+  try {
+    function findItemValue(xpath) {
+      return xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
+        .childNodes[0].nodeValue;
+    }
 
-  const title = findItemValue('//channel/title');
-  const url = findItemValue('//channel/link');
-  const text = findItemValue('//channel/description');
-  let img = '';
-  if (
-    xmlDoc.evaluate('//channel/image/url', xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
-  ) {
-    img = findItemValue('//channel/image/url');
-  }
-  const articles = [];
-  const nodesSnapshot = xmlDoc.evaluate(
-    '//channel/item',
-    xmlDoc,
-    null,
-    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-    null
-  );
+    const title = findItemValue('//channel/title');
+    const url = findItemValue('//channel/link');
+    const text = findItemValue('//channel/description');
+    let img = '';
+    if (
+      xmlDoc.evaluate('//channel/image/url', xmlDoc, null, XPathResult.ANY_TYPE, null).iterateNext()
+    ) {
+      img = findItemValue('//channel/image/url');
+    }
+    const articles = [];
+    const nodesSnapshot = xmlDoc.evaluate(
+      '//channel/item',
+      xmlDoc,
+      null,
+      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+      null
+    );
 
-  for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-    const article = {
-      title: '',
-      link: '',
-      description: '',
-      date: '',
-      img: '',
-      read: false,
-      readLater: false,
-    };
-    article.title = nodesSnapshot.snapshotItem(i).getElementsByTagName('title')[0].textContent;
-    article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
-    article.description = nodesSnapshot
-      .snapshotItem(i)
-      .getElementsByTagName('description')[0].textContent;
-    article.date = nodesSnapshot.snapshotItem(i).getElementsByTagName('pubDate')[0].textContent;
-    articles.push(article);
-  }
-  var namespaceResolver = (function() {
-    var prefixMap = {
-      media: 'http://search.yahoo.com/mrss/',
-      ynews: 'http://news.yahoo.com/rss/',
-    };
-    return function(prefix) {
-      return prefixMap[prefix] || null;
-    };
-  })();
-  const articlesImg = xmlDoc.evaluate(
-    '//channel/item/media:thumbnail/@url',
-    xmlDoc,
-    namespaceResolver,
-    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-    null
-  )
-    ? xmlDoc.evaluate(
-        '//channel/item/media:thumbnail/@url',
-        xmlDoc,
-        namespaceResolver,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
-      )
-    : xmlDoc.evaluate(
-        '//channel/item/media:content/@url',
-        xmlDoc,
-        namespaceResolver,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
-      );
+    for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
+      const article = {
+        title: '',
+        link: '',
+        description: '',
+        date: '',
+        img: '',
+        read: false,
+        readLater: false,
+      };
+      article.title = nodesSnapshot.snapshotItem(i).getElementsByTagName('title')[0].textContent;
+      article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
+      article.description = nodesSnapshot
+        .snapshotItem(i)
+        .getElementsByTagName('description')[0].textContent;
+      article.date = nodesSnapshot.snapshotItem(i).getElementsByTagName('pubDate')[0].textContent;
+      articles.push(article);
+    }
+    var namespaceResolver = (function() {
+      var prefixMap = {
+        media: 'http://search.yahoo.com/mrss/',
+        ynews: 'http://news.yahoo.com/rss/',
+      };
+      return function(prefix) {
+        return prefixMap[prefix] || null;
+      };
+    })();
+    const articlesImg = xmlDoc.evaluate(
+      '//channel/item/media:thumbnail/@url',
+      xmlDoc,
+      namespaceResolver,
+      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+      null
+    )
+      ? xmlDoc.evaluate(
+          '//channel/item/media:thumbnail/@url',
+          xmlDoc,
+          namespaceResolver,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        )
+      : xmlDoc.evaluate(
+          '//channel/item/media:content/@url',
+          xmlDoc,
+          namespaceResolver,
+          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+          null
+        );
 
-  for (let i = 0; i < articlesImg.snapshotLength; i++) {
-    articles[i].img = articlesImg.snapshotItem(i).textContent;
+    for (let i = 0; i < articlesImg.snapshotLength; i++) {
+      articles[i].img = articlesImg.snapshotItem(i).textContent;
+    }
+
+    const newSource = {
+      name: title,
+      link: url,
+      description: text,
+      img: img,
+      rssLink: URL,
+      articles,
+    };
+    return newSource;
+  } catch (error) {
+    console.error(error);
+    alert("Unfortunately we can't save this blog");
   }
-  const newSource = {
-    name: title,
-    link: url,
-    description: text,
-    img: img,
-    rssLink: URL,
-    articles,
-  };
-  return newSource;
 }
 function getRssURLsFromXml(xmlDoc) {
   const nodesSnapshot = xmlDoc.evaluate(
@@ -147,7 +153,7 @@ function findCurrentSource(URL) {
         if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
           const xmlDoc = xmlhttp.responseXML;
           if (xmlDoc && xmlDoc.evaluate) {
-            const newSource = parseSource(xmlDoc);
+            const newSource = parseSource(xmlDoc, URL);
             resolve(newSource);
           } else {
             reject(console.error(xmlhttp.statusText));

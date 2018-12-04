@@ -1,10 +1,17 @@
 <template>
   <div class="app-container">
-    <app-header class="app-header"></app-header>
+    <app-header class="app-header" />
     <div class="wrapper">
-      <app-sidebar id="app-sidebar" v-bind:style="sidebarStyle"></app-sidebar>
-      <div @click="closeSidebar" id="app-content" v-bind:style="contentStyle">
-        <router-view></router-view>
+      <app-sidebar 
+        id="app-sidebar" 
+        :style="sidebarStyle" 
+      />
+      <div 
+id="app-content" 
+           :style="contentStyle" 
+@click="closeSidebar"
+>
+        <router-view />
       </div>
     </div>
   </div>
@@ -19,7 +26,11 @@ import Articles from './Articles';
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  name: 'reader',
+  name: 'Reader',
+  components: {
+    appHeader: Header,
+    appSidebar: Sidebar,
+  },
   computed: {
     user() {
       return this.$store.getters['user/user'];
@@ -30,43 +41,51 @@ export default {
     userCategories() {
       return this.$store.getters['userSources/categories'];
     },
-    userSettings(){
-       return this.$store.getters['settings/settings'];
+    userSettings() {
+      return this.$store.getters['settings/settings'];
     },
-    contentStyle(){
-      if(this.userSettings)
-      return { 
-        fontFamily:this.userSettings.fontFamily,
-        color:this.userSettings.textColor,
-        backgroundColor:this.userSettings.bgColor,
-        fontSize:this.userSettings.fontSize
-      }
-      else return{
-        fontFamily:'sans-serif',
-        color:'#000000',
-        backgroundColor:'#ffffff',
-        fontSize:'medium'
-      }
+    contentStyle() {
+      if (this.userSettings)
+        return {
+          fontFamily: this.userSettings.fontFamily,
+          color: this.userSettings.textColor,
+          backgroundColor: this.userSettings.bgColor,
+          fontSize: this.userSettings.fontSize,
+        };
+      else
+        return {
+          fontFamily: 'sans-serif',
+          color: '#000000',
+          backgroundColor: '#ffffff',
+          fontSize: 'medium',
+        };
     },
-    sidebarStyle(){
-      if(this.userSettings)
-      return{
-        fontFamily:this.userSettings.fontFamily,
-        color:this.userSettings.sidebarTextColor,
-        backgroundColor:this.userSettings.sidebarColor,
-        fontSize:this.userSettings.fontSize
-      }
-      else return{
-        fontFamily:'sans-serif',
-        color:'#007bff',
-        backgroundColor:'#dbe4ee',
-        fontSize:'medium'
-      }
-    }
+    sidebarStyle() {
+      if (this.userSettings)
+        return {
+          fontFamily: this.userSettings.fontFamily,
+          color: this.userSettings.sidebarTextColor,
+          backgroundColor: this.userSettings.sidebarColor,
+          fontSize: this.userSettings.fontSize,
+        };
+      else
+        return {
+          fontFamily: 'sans-serif',
+          color: '#007bff',
+          backgroundColor: '#dbe4ee',
+          fontSize: 'medium',
+        };
+    },
   },
-  components: {
-    appHeader: Header,
-    appSidebar: Sidebar
+  created() {
+    this.$store.dispatch('userSources/setUserSources');
+    this.$store.dispatch('userSources/setUserCategories');
+    this.$store.dispatch('userSources/updateSources');
+    this.$store.dispatch('settings/setUserSettings');
+    this.$router.push('/reader/articles');
+  },
+  beforeCreate() {
+    this.$store.dispatch('settings/setUserSettings');
   },
   methods: {
     logOut() {
@@ -74,18 +93,8 @@ export default {
     },
     closeSidebar() {
       this.$store.dispatch('appearance/closeWideSidebar');
-    }
+    },
   },
-  created() {
-    this.$store.dispatch('userSources/setUserSources');
-    this.$store.dispatch('userSources/setUserCategories');
-    this.$store.dispatch('userSources/updateSources');
-    this.$store.dispatch('settings/setUserSettings');
-    this.$router.push('/reader/articles'); 
-  },
-  beforeCreate(){
-    this.$store.dispatch('settings/setUserSettings');
-  }
 };
 </script>
 

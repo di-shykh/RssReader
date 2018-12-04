@@ -121,9 +121,18 @@ export default {
   methods: {
     addNewSource(source) {
       this.currentSource = source;
-      this.isMenuSourceVisible = !this.isMenuSourceVisible;
-      const menu = document.querySelector('.menu-source');
-      this.setCoordinatsOfPopUpMenu(menu);
+      let isSourceExists = false;
+      this.userSources.some(item => {
+        if (item.source.rssLink == this.currentSource.rssLink) {
+          alert('This source already exists!');
+          isSourceExists = true;
+        }
+      });
+      if (!isSourceExists) {
+        this.isMenuSourceVisible = !this.isMenuSourceVisible;
+        const menu = document.querySelector('.menu-source');
+        this.setCoordinatsOfPopUpMenu(menu);
+      }
     },
     articles(source) {
       return source.articles.slice(0, 3);
