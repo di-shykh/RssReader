@@ -8,7 +8,7 @@
       <h2 v-else>All</h2>
     </div>
     <div 
-      v-for="(article,key) in articles" 
+      v-for="(article,key) in paginatedArticles" 
       class="row article"
     >
       <router-link 
@@ -41,6 +41,48 @@
         </div>
       </router-link>
     </div>
+    <nav 
+      v-show="isPaginationShowed" 
+      aria-label="Page navigation"
+      class="row col-12 justify-content-center"
+    >
+      <ul class="pagination ">
+        <li class="page-item">
+          <a 
+            class="page-link" 
+            href="#" 
+            aria-label="Previous"
+            @click="goPrevious()"
+          >
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Previous</span>
+          </a>
+        </li>
+        <li 
+          v-for="(page,index) in pages" 
+          :id="index"
+          class="page-item"
+          :class="{active:isActive}"
+        ><a 
+          class="page-link" 
+          href="#"
+          @click="updateArticles(index)"
+        >{{ page }}</a></li>
+
+        <li class="page-item">
+          <a 
+            class="page-link" 
+            href="#" 
+            aria-label="Next"
+            @click="goNext()"
+          >
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Next</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
   </div>
 </template>
 <script>
@@ -57,12 +99,17 @@ export default {
       readLater: this.$route.params.readLater,
       latestArticles: this.$route.params.latestArticles,
       isArticlesFiltered: false,
+      isPaginationShowed: false,
+      articlesForShowing: null,
+      index: 0,
+      isActive: false,
     };
   },
   computed: {
     viewList() {
       return this.$store.getters['userSources/viewList'];
     },
+
     sources() {
       return this.$store.getters['userSources/sources'];
     },
@@ -123,6 +170,20 @@ export default {
         }
       }
     },
+    pages() {
+      if (this.articles.length > 100) {
+        this.isPaginationShowed = true;
+        return Math.ceil(this.articles.length / 100);
+      } else this.isPaginationShowed = false;
+    },
+    paginatedArticles: {
+      get: function() {
+        return this.articlesForShowing;
+      },
+      set: function(newValue) {
+        this.articlesForShowing = newValue;
+      },
+    },
   },
   watch: {
     $route(to, from) {
@@ -136,6 +197,9 @@ export default {
         ? (this.isArticlesFiltered = true)
         : (this.isArticlesFiltered = false);
     },
+    articles() {
+      if (this.articles) this.articlesForShowing = this.articles.slice(0, 101);
+    },
   },
   created() {
     this.$store.dispatch('userSources/updateSources');
@@ -143,6 +207,23 @@ export default {
   methods: {
     deleteImgTagFromDescr(str) {
       if (str) return str.replace(/<img[^>]*>/gi, '').slice(0, 500) + '...'; //and make description not so long
+    },
+    goNext() {
+      if (this.index < this.pages - 1) this.updateArticles(this.index + 1);
+    },
+    goPrevious() {
+      if (this.index && this.index > 0) this.updateArticles(this.index - 1);
+    },
+    updateArticles(index) {
+      let newArr = this.articles.slice(0);
+      const allLi = document.querySelectorAll('li');
+      allLi.forEach(el => el.classList.remove('active'));
+      if (!isNaN(parseInt(index))) {
+        this.paginatedArticles = newArr.slice(index * 100 + 1, (index + 1) * 100 + 1);
+        this.index = index;
+        const li = document.getElementById(this.index);
+        li.classList.add('active');
+      }
     },
     deleteTagSpan(arr) {
       arr = arr.map(o => {
