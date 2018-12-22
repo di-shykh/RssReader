@@ -1,27 +1,28 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
 };
 </script>
 
 <style>
 html,
-body {
-  margin: 0;
+body,
+#app {
   height: 100%;
-  min-height: 100%;
 }
 body {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
+}
+.material-icons {
+  font-size: 50px !important;
+}
+.highlight {
+  background-color: orange;
 }
 </style>

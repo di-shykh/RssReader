@@ -1,11 +1,18 @@
 <template>
   <div class="app-container">
-    <app-header class="app-header"></app-header>
+    <app-header class="app-header" />
     <div class="wrapper">
-      <app-sidebar id="app-sidebar" class="float-left"></app-sidebar>
-        <div @click="closeSidebar">
-          <router-view id="app-content" class="offset-md-3"></router-view>
-        </div>
+      <app-sidebar 
+        id="app-sidebar" 
+        :style="sidebarStyle" 
+      />
+      <div 
+id="app-content" 
+           :style="contentStyle" 
+@click="closeSidebar"
+>
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
@@ -19,7 +26,11 @@ import Articles from './Articles';
 import { mapGetters, mapActions } from 'vuex';
 
 export default {
-  name: 'reader',
+  name: 'Reader',
+  components: {
+    appHeader: Header,
+    appSidebar: Sidebar,
+  },
   computed: {
     user() {
       return this.$store.getters['user/user'];
@@ -29,11 +40,52 @@ export default {
     },
     userCategories() {
       return this.$store.getters['userSources/categories'];
-    }
+    },
+    userSettings() {
+      return this.$store.getters['settings/settings'];
+    },
+    contentStyle() {
+      if (this.userSettings)
+        return {
+          fontFamily: this.userSettings.fontFamily,
+          color: this.userSettings.textColor,
+          backgroundColor: this.userSettings.bgColor,
+          fontSize: this.userSettings.fontSize,
+        };
+      else
+        return {
+          fontFamily: 'sans-serif',
+          color: '#000000',
+          backgroundColor: '#ffffff',
+          fontSize: 'medium',
+        };
+    },
+    sidebarStyle() {
+      if (this.userSettings)
+        return {
+          fontFamily: this.userSettings.fontFamily,
+          color: this.userSettings.sidebarTextColor,
+          backgroundColor: this.userSettings.sidebarColor,
+          fontSize: this.userSettings.fontSize,
+        };
+      else
+        return {
+          fontFamily: 'sans-serif',
+          color: '#007bff',
+          backgroundColor: '#dbe4ee',
+          fontSize: 'medium',
+        };
+    },
   },
-  components: {
-    appHeader: Header,
-    appSidebar: Sidebar
+  created() {
+    this.$store.dispatch('userSources/setUserSources');
+    this.$store.dispatch('userSources/setUserCategories');
+    this.$store.dispatch('userSources/updateSources');
+    this.$store.dispatch('settings/setUserSettings');
+    this.$router.push('/reader/articles');
+  },
+  beforeCreate() {
+    this.$store.dispatch('settings/setUserSettings');
   },
   methods: {
     logOut() {
@@ -41,13 +93,8 @@ export default {
     },
     closeSidebar() {
       this.$store.dispatch('appearance/closeWideSidebar');
-    }
+    },
   },
-  created() {
-    this.$store.dispatch('userSources/setUserSources');
-    this.$store.dispatch('userSources/setUserCategories');
-    this.$router.push('/reader/articles');
-  }
 };
 </script>
 
@@ -67,23 +114,25 @@ p {
 pre {
   text-align: left;
 }
-.app-header {
-  z-index: 0;
-  flex: 0 62px;
+.app-container {
+  height: 100%;
+}
+.wrapper {
   display: flex;
+  height: calc(100% - 62px);
 }
 #app-sidebar {
   flex: 0 0 auto;
   order: 0;
   flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
 }
 #app-content {
   flex: 1 1 auto;
+  height: 100%;
+  width: 100%;
   order: 1;
-  overflow: auto;
-}
-.wrapper {
-  flex: 1;
-  display: flex;
+  overflow-y: auto;
 }
 </style>
