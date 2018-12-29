@@ -2,6 +2,7 @@ import Vue from 'vue';
 import auth from '@/auth';
 import 'es6-promise/auto';
 import firebase from 'firebase';
+import ConnectToServer from '@/services/ConnectToServer';
 
 const state = {
   sources: [],
@@ -277,7 +278,8 @@ const actions = {
     const id = auth.user().uid;
     const userDb = db.ref(id);
     state.sources.forEach(async item => {
-      const articles = await dispatch('downloadSourceArticlesFromURL', item);
+      const response = await ConnectToServer.updateSource({ url: item.source.rssLink });
+      const articles = response.data;
       if (articles) {
         let data = {
           source: item,
@@ -287,95 +289,6 @@ const actions = {
         dispatch('updateArticles', data);
       }
     });
-  },
-  downloadSourceArticlesFromURL({ commit, dispatch, state }, source) {
-    return new Promise((resolve, reject) => {
-      try {
-        const xmlhttp = new XMLHttpRequest();
-        const URL = 'https://cors-anywhere.herokuapp.com/' + source.source.rssLink;
-        xmlhttp.open('GET', URL, true);
-        xmlhttp.onload = function(e) {
-          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-            const xmlDoc = xmlhttp.responseXML;
-            if (xmlDoc && xmlDoc.evaluate) {
-              const articles = dispatch('parseSource', xmlDoc);
-              resolve(articles);
-            }
-          } else {
-            reject(console.error(xmlhttp.statusText));
-          }
-        };
-        xmlhttp.onerror = function(e) {
-          reject(console.error(xmlhttp.statusText));
-        };
-        xmlhttp.send(null);
-      } catch (error) {
-        reject(console.error(error));
-      }
-    });
-  },
-  parseSource: ({ commit, state }, xmlDoc) => {
-    let articles = [];
-    const nodesSnapshot = xmlDoc.evaluate(
-      '//channel/item',
-      xmlDoc,
-      null,
-      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-      null
-    );
-    for (let i = 0; i < nodesSnapshot.snapshotLength; i++) {
-      const article = {
-        title: '',
-        link: '',
-        description: '',
-        date: '',
-        img: '',
-        read: false,
-        readLater: false,
-      };
-      article.title = nodesSnapshot.snapshotItem(i).getElementsByTagName('title')[0].textContent;
-      article.link = nodesSnapshot.snapshotItem(i).getElementsByTagName('link')[0].textContent;
-      article.description = nodesSnapshot
-        .snapshotItem(i)
-        .getElementsByTagName('description')[0].textContent;
-      article.date = nodesSnapshot.snapshotItem(i).getElementsByTagName('pubDate')[0].textContent;
-      articles.push(article);
-    }
-    var namespaceResolver = (function() {
-      var prefixMap = {
-        media: 'http://search.yahoo.com/mrss/',
-        ynews: 'http://news.yahoo.com/rss/',
-      };
-      return function(prefix) {
-        return prefixMap[prefix] || null;
-      };
-    })();
-    const articlesImg = xmlDoc.evaluate(
-      '//channel/item/media:thumbnail/@url',
-      xmlDoc,
-      namespaceResolver,
-      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-      null
-    )
-      ? xmlDoc.evaluate(
-          '//channel/item/media:thumbnail/@url',
-          xmlDoc,
-          namespaceResolver,
-          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-          null
-        )
-      : xmlDoc.evaluate(
-          '//channel/item/media:content/@url',
-          xmlDoc,
-          namespaceResolver,
-          XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-          null
-        );
-
-    for (let i = 0; i < articlesImg.snapshotLength; i++) {
-      articles[i].img = articlesImg.snapshotItem(i).textContent;
-    }
-    return articles;
   },
   updateArticles: ({ commit, state }, data) => {
     data.articles.forEach(o => {
