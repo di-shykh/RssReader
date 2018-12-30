@@ -2,25 +2,28 @@ const request = require('request');
 const Parser  = require('libxmljs');
 
 exports.findRssInUrl = function findRssInUrl(URL) {
-  return new Promise((resolve, reject) => {
-    try {
+  return new Promise((resolve, reject) => { 
       request(URL, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          //падает с разными ошибками, на разных сайтах разные ошибки падают в консоль или вообще зависает наглухо
-          const  xmlDoc = Parser.parseXml(body);
-          let rssFeeds=[];
-          let feeds = xmlDoc.find('//link[@type="application/rss+xml"]/@href');
-          if(feeds){
-            feeds.forEach(item=>{
-              rssFeeds.push(item.value());
-            }) 
-            resolve(rssFeeds);
+        try {
+          if (!error && response.statusCode == 200) {
+            //падает с разными ошибками, на разных сайтах разные ошибки падают в консоль или вообще зависает наглухо
+            const  xmlDoc = Parser.parseXml(body);
+            let rssFeeds=[];
+            let feeds = xmlDoc.find('//link[@type="application/rss+xml"]/@href');
+            if(feeds){
+              feeds.forEach(item=>{
+                rssFeeds.push(item.value());
+              }) 
+              resolve(rssFeeds);
+            }
+            else reject(console.log('error'))
           }
-        }});
-    } catch (error) {
-      reject(console.error(error));
-    }
-  });
+          else reject(console.error(error));
+      } catch (error) {
+        reject(console.error(error));
+      }
+    });
+  })
 }
 exports.findCurrentSource = function findCurrentSource(URL) {
   return new Promise((resolve, reject) => {
