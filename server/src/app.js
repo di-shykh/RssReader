@@ -7,39 +7,33 @@ const { wrap } = require('express-promise-wrap');
 
 
 const app = express();
-//app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(cors());
 
 app.post('/addsource', wrap(async(req, res) => {
   const URL = req.body.url;
+
   let sources=[];
   let newSource;
 
   try{
-    newSource = await parser.findCurrentSource(URL);
-    if (newSource) sources.push(newSource);
+    const feeds = await parser.findRssInUrl(URL);
+    if (feeds){
+      for(let i = 0;i < feeds.length; i++){
+        let source = await parser.findCurrentSource(feeds[i]);
+        if (source) sources.push(source);
+      }
+    }
+    else{
+      newSource = await parser.findCurrentSource(URL);
+      if (newSource) sources.push(newSource);
+    }
   }
   catch(error){
     console.error(error);
   }
   finally{
-    try{
-      if(!newSource){
-        const feeds = await parser.findRssInUrl(URL);
-        if(feeds){
-          for(let i = 0;i < feeds.length; i++){
-            let source = await parser.findCurrentSource(feeds[i]);
-            if (source) sources.push(source);
-          }
-        }
-      }
-      res.send(JSON.stringify(sources));
-    }
-    catch(error){
-      console.error(error);
-    }
-    
+    res.send(JSON.stringify(sources));
   }
 }));
 

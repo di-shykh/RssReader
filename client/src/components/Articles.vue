@@ -51,6 +51,17 @@
           <a 
             class="page-link" 
             href="#" 
+            aria-label="First"
+            @click="goFirst()"
+          >
+            <span class="sr-only">First</span>
+            First
+          </a>
+        </li>
+        <li class="page-item">
+          <a 
+            class="page-link" 
+            href="#" 
             aria-label="Previous"
             @click="goPrevious()"
           >
@@ -59,7 +70,7 @@
           </a>
         </li>
         <li 
-          v-for="(page,index) in pages" 
+          v-for="(page,index) in pagesForShowing" 
           :id="index"
           class="page-item"
           :class="{active:isActive}"
@@ -78,6 +89,17 @@
           >
             <span aria-hidden="true">&raquo;</span>
             <span class="sr-only">Next</span>
+          </a>
+        </li>
+        <li class="page-item">
+          <a 
+            class="page-link" 
+            href="#" 
+            aria-label="Last"
+            @click="goLast()"
+          >
+            <span class="sr-only">Last</span>
+            Last
           </a>
         </li>
       </ul>
@@ -109,7 +131,6 @@ export default {
     viewList() {
       return this.$store.getters['userSources/viewList'];
     },
-
     sources() {
       return this.$store.getters['userSources/sources'];
     },
@@ -176,6 +197,13 @@ export default {
         return Math.ceil(this.articles.length / 100);
       } else this.isPaginationShowed = false;
     },
+    pagesForShowing() {
+      let last = this.index + 3;
+      let first = this.index - 3;
+      if (this.index - 3 <= 0) first = 1;
+      if (this.index + 3 >= this.pages) last = this.pages;
+      return this.range(first, last);
+    },
     paginatedArticles: {
       get: function() {
         return this.articlesForShowing;
@@ -210,6 +238,17 @@ export default {
     },
     goNext() {
       if (this.index < this.pages - 1) this.updateArticles(this.index + 1);
+    },
+    range(start, end) {
+      return Array(end - start + 1)
+        .fill()
+        .map((_, idx) => start + idx);
+    },
+    goFirst() {
+      this.updateArticles(0);
+    },
+    goLast() {
+      this.updateArticles(this.pages - 1);
     },
     goPrevious() {
       if (this.index && this.index > 0) this.updateArticles(this.index - 1);

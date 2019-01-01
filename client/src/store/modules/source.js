@@ -88,6 +88,9 @@ const actions = {
       if (responseNewSource.data) {
         commit('findSource', responseNewSource.data);
       }
+      if (responseNewSource.data.length == 0) {
+        alert("Unfortunately we can't save this blog");
+      }
       elem.classList.remove('rotate');
       wait.style.display = 'none';
     } catch (error) {
