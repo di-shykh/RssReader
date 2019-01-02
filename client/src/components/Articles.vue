@@ -70,14 +70,13 @@
           </a>
         </li>
         <li 
-          v-for="(page,index) in pagesForShowing" 
-          :id="index"
+          v-for="page in pagesForShowing" 
+          :id="page-1"
           class="page-item"
-          :class="{active:isActive}"
         ><a 
           class="page-link" 
           href="#"
-          @click="updateArticles(index)"
+          @click="updateArticles(page-1)"
         >{{ page }}</a></li>
 
         <li class="page-item">
@@ -104,7 +103,6 @@
         </li>
       </ul>
     </nav>
-
   </div>
 </template>
 <script>
@@ -124,7 +122,6 @@ export default {
       isPaginationShowed: false,
       articlesForShowing: null,
       index: 0,
-      isActive: false,
     };
   },
   computed: {
@@ -260,8 +257,10 @@ export default {
       if (!isNaN(parseInt(index))) {
         this.paginatedArticles = newArr.slice(index * 100 + 1, (index + 1) * 100 + 1);
         this.index = index;
-        const li = document.getElementById(this.index);
-        li.classList.add('active');
+        const timeoutID = setTimeout(() => {
+          const li = document.getElementById(index);
+          li.classList.add('active');
+        }, 10);
       }
     },
     deleteTagSpan(arr) {
