@@ -17,6 +17,7 @@
     "start": "nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/app.js --exec \"npm run lint --fix && node\"",
+    "build": "node build/build.js",
     "lint": "eslint --fix **/*.js "
   },
   "keywords": [],
