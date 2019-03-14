@@ -1,2 +1,2 @@
-web: node web/server.js
-api: node api/app.js
+web: node client/server.js
+api: node server/app.js
