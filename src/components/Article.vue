@@ -1,3 +1,4 @@
+/* eslint-disable vue/no-parsing-error */
 <template>
   <div 
     class="container" 
@@ -7,6 +8,8 @@
       <div class="col-3 date">{{ getDate(article.date) }}</div>
       <h4 
         class="col-6" 
+        // eslint-disable-next-line 
+vue/no-v-html
         v-html="article.title"
       />
       <div class="col-3">
