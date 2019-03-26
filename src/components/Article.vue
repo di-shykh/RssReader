@@ -81,14 +81,14 @@ import VueGoodshareFacebook from 'vue-goodshare/src/providers/Facebook.vue';
 import VueGoodshareVkontakte from 'vue-goodshare/src/providers/Vkontakte.vue';
 import VueGoodshareTwitter from 'vue-goodshare/src/providers/Twitter.vue';
 // eslint-disable-next-line import/no-unresolved
-import VueGoodshareGoogleplus from 'vue-goodshare/src/providers/Googleplus.vue';
+//import VueGoodshareGoogleplus from 'vue-goodshare/src/providers/Googleplus.vue';
 
 export default {
   components: {
     VueGoodshareFacebook,
     VueGoodshareVkontakte,
     VueGoodshareTwitter,
-    VueGoodshareGoogleplus,
+    //VueGoodshareGoogleplus,
   },
   data() {
     return {
