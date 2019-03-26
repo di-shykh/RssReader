@@ -9,7 +9,8 @@
       <h4 
         class="col-6" 
         // eslint-disable-next-line 
-vue/no-v-html
+        vue/
+        no-v-html
         v-html="article.title"
       />
       <div class="col-3">
@@ -79,6 +80,7 @@ vue/no-v-html
 import VueGoodshareFacebook from 'vue-goodshare/src/providers/Facebook.vue';
 import VueGoodshareVkontakte from 'vue-goodshare/src/providers/Vkontakte.vue';
 import VueGoodshareTwitter from 'vue-goodshare/src/providers/Twitter.vue';
+// eslint-disable-next-line import/no-unresolved
 import VueGoodshareGoogleplus from 'vue-goodshare/src/providers/Googleplus.vue';
 
 export default {
