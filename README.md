@@ -9,12 +9,12 @@
    - search for rss feed
    - saving this feed in database
    - displaying articles general list/ by category/ by source
-    - search by articles
-    - displaying an article preview, go to the source site
-    - adding an article to the list for reading (read later)
-    - share article in social networks
-    - change user settings (color scheme, font)
-    - edit source (change name, category, unsubscribe)
+   - search by articles
+   - displaying an article preview, go to the source site
+   - adding an article to the list for reading (read later)
+   - share article in social networks
+   - change user settings (color scheme, font)
+   - edit source (change name, category, unsubscribe)
 ## Link to the application
 https://rss-reader-v1.herokuapp.com/
 
